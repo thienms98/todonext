@@ -2,22 +2,14 @@
 
 import Image from 'next/image';
 import React, { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import type { User } from '@/utils/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
-import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faUser, faMagnifyingGlass, faBars } from '@fortawesome/free-solid-svg-icons';
+import { RootState } from '@/store';
 
-const UserSelector = ({
-  list,
-  selection,
-  changeHandler,
-}: {
-  list: User[];
-  selection?: User[];
-  changeHandler: Function;
-}) => {
+const UserSelector = ({ selection, changeHandler }: { selection?: User[]; changeHandler: Function }) => {
+  const list = useSelector((state: RootState) => state.users);
   const [selectMode, setSelectMode] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [userList, setUserList] = useState<User[]>([...list]);
@@ -48,17 +40,22 @@ const UserSelector = ({
     });
     if (newList.length === 0) newList.push(...list);
     setUserList(newList);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const handleSelect: Function = (user: User) => {
     const idx = selected.findIndex((item) => item.name === user.name);
     let newSelected = [...selected];
-    if (idx === -1) newSelected = [...newSelected, user];
-    else {
+    let flag;
+    if (idx === -1) {
+      newSelected = [...newSelected, user];
+      flag = 1;
+    } else {
       newSelected.splice(idx, 1);
+      flag = -1;
     }
     setSelected(newSelected);
-    changeHandler(newSelected);
+    changeHandler(newSelected, flag, user);
   };
 
   return (
@@ -72,11 +69,11 @@ const UserSelector = ({
               </div>
             ))}
             <div className="w-6 h-6 rounded-full overflow-hidden border-2 flex items-center justify-center">
-              <FontAwesomeIcon icon={faPlus} />
+              <FontAwesomeIcon icon={faBars} />
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center">
+          <div className="w-full flex items-center justify-center border-2 rounded-sm">
             <FontAwesomeIcon icon={faUser} />
           </div>
         )}

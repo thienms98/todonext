@@ -6,49 +6,16 @@ const placeholderImg: string =
     'https://www.dovercourt.org/wp-content/uploads/2019/11/610-6104451_image-placeholder-png-user-profile-placeholder-image-png-286x300.jpg';
 
 
-const initialState: Task[] = [
-  {
-    id: 230,
-    title: 'Tìm hiểu cơ bản về NextJS, Typescript',
-    createdDate: new Date('9/18/2023'),
-    deadline: new Date('9/19/2023'),
-    creator: { id: 100, name: 'Abigail', image: placeholderImg },
-    assignees: [
-      { id: 101, name: 'Alexandra', image: placeholderImg },
-      { id: 102, name: 'Alison', image: placeholderImg },
-    ],
-    completed: false,
-  },
-  {
-    id: 231,
-    title: 'Tạo source todo app build từ NextJs 13 App router',
-    createdDate: new Date('9/18/2023'),
-    deadline: new Date('9/19/2023'),
-    creator: { id: 100, name: 'Abigail', image: placeholderImg },
-    assignees: [
-      { id: 101, name: 'Alexandra', image: placeholderImg },
-      { id: 102, name: 'Alison', image: placeholderImg },
-    ],
-    completed: false,
-  },
-  {
-    id: 232,
-    title: `Tạo trang danh sách todo với các trường tên, ngày tạo, ngày deadline, trạng thái, người tạo, người được assign`,
-    createdDate: new Date('9/18/2023'),
-    deadline: new Date('9/19/2023'),
-    creator: { id: 100, name: 'Abigail', image: placeholderImg },
-    assignees: [
-      { id: 101, name: 'Alexandra', image: placeholderImg },
-      { id: 102, name: 'Alison', image: placeholderImg },
-    ],
-    completed: false,
-  },
-];
+const initialState: Task[] = [];
 
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
   reducers: {
+    initTasks: (state, action: PayloadAction<Task[]>) => {
+      state.splice(0, state.length)
+      state.push(...action.payload)
+    },
     createTask: (state, action:PayloadAction<{title:string, deadline: Date, assignees: User[]}>) => {
       const data = {
         id: Math.random() * Math.pow(10, 12),
@@ -90,5 +57,5 @@ const tasksSlice = createSlice({
   }
 })
 
-export const {createTask, removeTask, changeState, changeTitle, changeAssignees, changeDeadline} = tasksSlice.actions
+export const {initTasks, createTask, removeTask, changeState, changeTitle, changeAssignees, changeDeadline} = tasksSlice.actions
 export default tasksSlice.reducer
