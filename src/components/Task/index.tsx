@@ -12,7 +12,7 @@ import { faCircle, faCircleCheck, faTrashCan, faPenToSquare, faSquareCheck } fro
 
 import type { Task, User } from '@/utils/types';
 import UserSelector from '../UserSelector';
-import { users } from '@/app/page';
+import { users } from '@/utils/mocks/users';
 
 export default function Task({ task }: { task: Task }) {
   const [editMode, setEditMode] = useState<boolean>(false);
