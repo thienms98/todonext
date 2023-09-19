@@ -8,7 +8,7 @@ import { store } from '@/store';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: 'Todo',
   description: 'My Todo with Nextjs',
 };
