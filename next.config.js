@@ -1,11 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    remotePatterns: [
-      {
-        hostname: 'www.dovercourt.org',
-      },
-    ],
+    domains: ['www.dovercourt.org', 'picsum.photos'],
   },
 };
 

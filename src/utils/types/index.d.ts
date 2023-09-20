@@ -14,14 +14,19 @@ export interface Task {
   completed: boolean;
 }
 
-export interface ResponseTask {
+type TaskResponse = {
   id: number;
   title: string;
   created_at: Date;
   due_at: Date;
+  assignees: {
+    userId: number,
+    taskId: number,
+    users: User
+  }[];
   creatorid: User;
-  assignees: User[];
   isDone: boolean;
-}
+};
+
 
 export type TaskField = 'id' | 'title' | 'createdDate' | 'deadline' | 'creator' | 'assignees' | 'completed'

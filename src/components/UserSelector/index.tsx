@@ -65,7 +65,13 @@ const UserSelector = ({ selection, changeHandler }: { selection?: User[]; change
           <>
             {selected.map((user) => (
               <div key={Math.random()}>
-                <Image width={24} height={24} src={user.image} alt={user.name} title={user.name} />
+                <Image
+                  width={24}
+                  height={24}
+                  src={user.image || 'https://picsum.photos/200'}
+                  alt={user.name || ''}
+                  title={user.name}
+                />
               </div>
             ))}
             <div className="w-6 h-6 rounded-full overflow-hidden border-2 flex items-center justify-center">
@@ -99,11 +105,13 @@ const UserSelector = ({ selection, changeHandler }: { selection?: User[]; change
               const contain = selected.findIndex((item) => item.name === user.name) !== -1;
               return (
                 <div
-                  className={`flex border-2 cursor-pointer ${contain ? 'border-blue-600' : ''}`}
+                  className={`flex gap-2 border-2 cursor-pointer ${
+                    contain ? 'border-blue-600 text-white bg-blue-500' : ''
+                  }`}
                   key={Math.random()}
                   onClick={() => handleSelect(user)}
                 >
-                  <Image width={24} height={24} src={user.image} alt="" />
+                  <Image width={24} height={24} src={user.image || 'https://picsum.photos/200'} alt="" />
                   <span>{user.name}</span>
                 </div>
               );

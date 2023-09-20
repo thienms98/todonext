@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeTask, changeState, changeTitle, changeAssignees, changeDeadline } from '@/store/tasks';
-import { supabase } from '@/supabase';
+import axios from 'axios';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -39,30 +39,72 @@ function Task({ task }: { task: Task }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const updateCompleted = async () => {
+    await axios({
+      method: 'put',
+      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/update?task_id=${task.id}`,
+      data: {
+        isDone: !task.completed,
+      },
+    });
+    dispatch(changeState({ id: task.id }));
+  };
+
   const updateTitle = async () => {
     setEditMode(false);
     dispatch(changeTitle({ id: task.id, title }));
-    await supabase.from('tasks').update({ title }).eq('id', task.id);
+    await axios({
+      method: 'POST',
+      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/update?task_id=${task.id}`,
+      data: {
+        title,
+      },
+    });
   };
+
   const updateDeadline = async (e: any) => {
     const deadline = new Date(e.target.value);
     if (deadline.getTime() - new Date().getTime() >= 0) {
+      await axios({
+        method: 'post',
+        url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/update?task_id=${task.id}`,
+        data: {
+          due_at: deadline,
+        },
+      });
       dispatch(changeDeadline({ id: task.id, deadline }));
-      await supabase.from('tasks').update({ due_at: deadline.toLocaleDateString() }).eq('id', task.id);
     }
   };
+
   const updateAssignees = async (assignees: User[], flag: number, user: User) => {
     dispatch(changeAssignees({ id: task.id, assignees }));
     console.log('update assignees', flag, user);
-    if (flag === 1) await supabase.from('assignees').insert({ userId: user.id, taskId: task.id });
-    if (flag === -1) await supabase.from('assignees').delete().eq('userId', user.id).eq('taskId', task.id);
+    if (flag === 1)
+      axios({
+        method: 'post',
+        url: `${process.env.NEXT_PUBLIC_API_URL}/assignees`,
+        data: {
+          taskId: task.id,
+          userId: user.id,
+        },
+      });
+    if (flag === -1)
+      axios({
+        method: 'post',
+        url: `${process.env.NEXT_PUBLIC_API_URL}/assignees/delete`,
+        data: {
+          taskId: task.id,
+          userId: user.id,
+        },
+      });
   };
-  const updateCompleted = async () => {
-    await supabase.from('tasks').update({ isDone: !task.completed }).eq('id', task.id);
-    dispatch(changeState({ id: task.id }));
-  };
+
   const deleteTask = async () => {
-    await supabase.from('tasks').delete().eq('id', task.id);
+    dispatch(removeTask({ id: task.id }));
+    await axios({
+      method: 'post',
+      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/delete?task_id=${task.id}`,
+    });
   };
 
   return (
@@ -77,7 +119,7 @@ function Task({ task }: { task: Task }) {
             onSubmit={(e) => {
               e.preventDefault();
               setEditMode(false);
-              dispatch(changeTitle({ id: task.id, title }));
+              updateTitle();
             }}
           >
             <input
@@ -91,7 +133,7 @@ function Task({ task }: { task: Task }) {
           </form>
         ) : (
           <>
-            <Link href="/task">{task.title}</Link>
+            <Link href={`/task/${task.id}`}>{task.title}</Link>
             <div
               className="invisible cursor-pointer ml-2 group-hover/interact:visible"
               onClick={() => setEditMode(true)}
@@ -144,7 +186,12 @@ function Task({ task }: { task: Task }) {
           key={Math.random()}
           title={task.creator.name}
         >
-          <Image height={24} width={24} src={task.creator.image} alt={task.creator.name} />
+          <Image
+            height={24}
+            width={24}
+            src={task.creator.image || 'https://picsum.photos/200'}
+            alt={task.creator.name || ''}
+          />
         </div>
       </div>
     </div>
