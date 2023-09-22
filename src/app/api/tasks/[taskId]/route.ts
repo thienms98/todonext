@@ -6,7 +6,29 @@ export async function GET(request: NextRequest){
   const taskId = request.nextUrl.pathname.split('/').at(-1);
 
   if(taskId?.trim() && +taskId){
-    let task = await prisma.tasks.findUnique({where: {id: +taskId}})
+    let task = await prisma.tasks.findUnique({
+      where: {id: +taskId},
+      include: {
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            image: true
+          }
+        },
+        assignees: {
+          include: {
+            users: {
+              select: {
+                id: true,
+                username: true,
+                image: true
+              }
+            }
+          }
+        }
+      }
+    })
     if(task) return NextResponse.json({
       status: 'success',
       task

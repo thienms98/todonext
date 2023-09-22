@@ -10,7 +10,7 @@ export interface Info {
   refreshToken?: string;
 }
 
-const initialState:Info = JSON.parse(localStorage.getItem('auth') || '{}');
+const initialState:Info = {};
 
 const authSlice = createSlice({
   name: 'auth',

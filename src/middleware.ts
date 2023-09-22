@@ -23,6 +23,7 @@ export const config = {
   matcher: [
   '/', 
   '/tasks', 
+  '/tasks/:taskId*', 
   '/api/tasks',
   '/api/users',
   '/api/tasks/:taskId*',

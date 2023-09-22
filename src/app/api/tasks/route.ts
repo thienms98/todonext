@@ -4,6 +4,7 @@ import type { User, Task } from "@/utils/types";
 import {verify} from 'jsonwebtoken'
 
 export async function GET(req: NextRequest) {
+  // const searchParams:{limit: number, start: number} = req.nextUrl.searchParams 
   const accessToken = req.headers.get('authorization')?.split(' ')[1];
   if(!accessToken) return NextResponse.json({
     success: false,

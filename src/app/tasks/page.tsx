@@ -5,7 +5,7 @@ import { Task, User, TaskResponse } from "@/utils/types";
 import { cookies } from "next/headers";
 
 async function getTodo(headers: {}) {
-  const { data } = await axios("http://localhost:3000/api/tasks", {
+  const { data } = await axios("http://localhost:3000/api/tasks?limit=20", {
     headers,
   });
   console.log(data);

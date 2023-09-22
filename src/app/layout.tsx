@@ -2,10 +2,11 @@
 
 import "./globals.css";
 import type { Metadata } from "next";
-import { Provider, useDispatch } from "react-redux";
 import { store } from "@/store";
+import { Provider } from "react-redux";
 
 import Header from "./Header";
+import AuthWrapper from "@/components/AuthWrapper";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,9 +27,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Provider store={store}>
-          <Header />
-          {children}
-          {modal}
+          <AuthWrapper>
+            <Header />
+            {children}
+            {modal}
+          </AuthWrapper>
         </Provider>
       </body>
     </html>

@@ -40,6 +40,9 @@ const Header = () => {
       <h1 className="text-3xl">
         <Link href="/">Todo</Link>
       </h1>
+      <div>
+        <Link href="/tasks">Tasks</Link>
+      </div>
       {user && Object.keys(user).length > 1 ? (
         <div className="flex">
           <div className="rounded-full w-6 h-6 overflow-hidden">
