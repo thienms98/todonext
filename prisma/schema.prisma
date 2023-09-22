@@ -19,18 +19,21 @@ model assignees {
 model tasks {
   id         Int         @id @default(autoincrement())
   title      String?
-  created_at DateTime?   @db.Date
-  due_at     DateTime?   @db.Date
-  creatorid  Int?
+  created_at DateTime?   @default(now()) @db.Date
+  due_at     DateTime?   @default(now()) @db.Date
+  creatorid  Int
   isDone     Boolean     @default(false)
   assignees  assignees[]
   creator    users?      @relation(fields: [creatorid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {
-  id        Int         @id @default(autoincrement())
-  name      String?
-  image     String?
-  assignees assignees[]
-  tasks     tasks[]
+  id           Int         @id @default(autoincrement())
+  name         String?
+  image        String?
+  password     String
+  refreshToken String?
+  username     String      @unique
+  assignees    assignees[]
+  tasks        tasks[]
 }

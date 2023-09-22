@@ -3,12 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import type { User, Task } from "@/utils/types";
 
 export async function GET(request: NextRequest) {
-  // const page_str = request.nextUrl.searchParams.get("page");
-  // const limit_str = request.nextUrl.searchParams.get("limit");
-
-  // const page = page_str ? parseInt(page_str, 10) : 1;
-  // const limit = limit_str ? parseInt(limit_str, 10) : 10;
-  // const skip = (page - 1) * limit;
   const tasks = await prisma.tasks.findMany({
     include: {
       assignees: {
@@ -16,7 +10,8 @@ export async function GET(request: NextRequest) {
           users: true
         }
       }
-    }
+    },
+    orderBy: {id: "asc"}
   });
   
   let json_response = {
@@ -46,19 +41,19 @@ export async function POST(request: NextRequest) {
       })
       
       return NextResponse.json({
-        state: 'success',
+        status: 'success',
       })
     }
     catch(err){
       return NextResponse.json({
-        state: 'failure',
+        status: 'failure',
         message: err 
       })
     }
   }
     catch(err){
       return NextResponse.json({
-        state: 'failure',
+        status: 'failure',
         message: err 
       })
     }

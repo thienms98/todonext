@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 
-export const prisma = new PrismaClient()
+const prisma = new PrismaClient()
 
 async function main() {
   // ... you will write your Prisma Client queries here
@@ -15,3 +15,5 @@ main()
     await prisma.$disconnect()
     process.exit(1)
   })
+
+export {prisma}

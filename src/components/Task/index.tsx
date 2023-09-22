@@ -1,14 +1,20 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from "next/image";
+import Link from "next/link";
 
-import { useState, useRef, useEffect, memo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { removeTask, changeState, changeTitle, changeAssignees, changeDeadline } from '@/store/tasks';
-import axios from 'axios';
+import { useState, useRef, useEffect, memo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  removeTask,
+  changeState,
+  changeTitle,
+  changeAssignees,
+  changeDeadline,
+} from "@/store/tasks";
+import axios from "axios";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircle,
   faCircleCheck,
@@ -17,10 +23,11 @@ import {
   faSquareCheck,
   faTimes,
   faCheck,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
 
-import type { Task, User } from '@/utils/types';
-import UserSelector from '../UserSelector';
+import type { Task, User } from "@/utils/types";
+import UserSelector from "../UserSelector";
+import { notification } from "antd";
 
 function Task({ task }: { task: Task }) {
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -35,14 +42,15 @@ function Task({ task }: { task: Task }) {
   }, [editMode]);
 
   useEffect(() => {
-    if (dateRef.current) dateRef.current.valueAsNumber = task.deadline.getTime();
+    if (dateRef.current)
+      dateRef.current.valueAsNumber = task.deadline.getTime();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateCompleted = async () => {
     await axios({
-      method: 'put',
-      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/update?task_id=${task.id}`,
+      method: "put",
+      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
       data: {
         isDone: !task.completed,
       },
@@ -52,59 +60,73 @@ function Task({ task }: { task: Task }) {
 
   const updateTitle = async () => {
     setEditMode(false);
-    dispatch(changeTitle({ id: task.id, title }));
-    await axios({
-      method: 'POST',
-      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/update?task_id=${task.id}`,
+    const res = await axios({
+      method: "put",
+      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
       data: {
         title,
       },
     });
+    if (res.data.status === "failure") {
+      notification.error({ message: "Update failed" });
+      return;
+    }
+    notification.success({ message: "Update successfully" });
+    dispatch(changeTitle({ id: task.id, title }));
   };
 
   const updateDeadline = async (e: any) => {
     const deadline = new Date(e.target.value);
     if (deadline.getTime() - new Date().getTime() >= 0) {
-      await axios({
-        method: 'post',
-        url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/update?task_id=${task.id}`,
+      const res = await axios({
+        method: "put",
+        url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
         data: {
           due_at: deadline,
         },
       });
+      if (res.data.status === "failure") {
+        notification.error({ message: "Update failed" });
+        return;
+      }
+      notification.success({ message: "Update successfully" });
       dispatch(changeDeadline({ id: task.id, deadline }));
     }
   };
 
-  const updateAssignees = async (assignees: User[], flag: number, user: User) => {
+  const updateAssignees = async (
+    assignees: User[],
+    flag: number,
+    user: User
+  ) => {
+    const method = flag === -1 ? "delete" : "post";
+    const res = await axios({
+      method,
+      url: `${process.env.NEXT_PUBLIC_API_URL}/assignees`,
+      data: {
+        taskId: task.id,
+        userId: user.id,
+      },
+    });
+    if (res.data.status === "failure") {
+      notification.error({ message: "Update failed" });
+      return;
+    }
+    notification.success({ message: "Update successfully" });
     dispatch(changeAssignees({ id: task.id, assignees }));
-    console.log('update assignees', flag, user);
-    if (flag === 1)
-      axios({
-        method: 'post',
-        url: `${process.env.NEXT_PUBLIC_API_URL}/assignees`,
-        data: {
-          taskId: task.id,
-          userId: user.id,
-        },
-      });
-    if (flag === -1)
-      axios({
-        method: 'post',
-        url: `${process.env.NEXT_PUBLIC_API_URL}/assignees/delete`,
-        data: {
-          taskId: task.id,
-          userId: user.id,
-        },
-      });
   };
 
   const deleteTask = async () => {
-    dispatch(removeTask({ id: task.id }));
-    await axios({
-      method: 'post',
-      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/delete?task_id=${task.id}`,
+    const res = await axios({
+      method: "delete",
+      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
     });
+    if (res.data.status === "failure") {
+      notification.error({ message: "Delele task failed" });
+      return;
+    }
+    notification.success({ message: "Delele task successfully" });
+    dispatch(removeTask({ id: task.id }));
   };
 
   return (
@@ -112,7 +134,7 @@ function Task({ task }: { task: Task }) {
       <div className="w-10" onClick={updateCompleted}>
         <FontAwesomeIcon icon={task.completed ? faCircleCheck : faCircle} />
       </div>
-      <div className="flex-1 flex gap-2 pr-4 group/interact">
+      <div className="flex-[4] flex gap-2 group/interact">
         {editMode ? (
           <form
             className="w-full flex"
@@ -133,7 +155,7 @@ function Task({ task }: { task: Task }) {
           </form>
         ) : (
           <>
-            <Link href={`/task/${task.id}`}>{task.title}</Link>
+            <Link href={`/tasks/${task.id}`}>{task.title}</Link>
             <div
               className="invisible cursor-pointer ml-2 group-hover/interact:visible"
               onClick={() => setEditMode(true)}
@@ -161,18 +183,26 @@ function Task({ task }: { task: Task }) {
                   </div>
                 </div>
               ) : (
-                <FontAwesomeIcon icon={faTrashCan} onClick={() => setDelMode(true)} />
+                <FontAwesomeIcon
+                  icon={faTrashCan}
+                  onClick={() => setDelMode(true)}
+                />
               )}
             </div>
           </>
         )}
       </div>
-      <div className="flex flex-row basis-28">
-        <UserSelector selection={task.assignees} changeHandler={updateAssignees} />
+      <div className="flex flex-row flex-[2]">
+        <UserSelector
+          selection={task.assignees}
+          changeHandler={updateAssignees}
+        />
       </div>
-      <div className="basis-28">{task.createdDate.toLocaleDateString('vi')}</div>
-      <div className="basis-28 group/date flex flex-nowrap items-center">
-        <span className="">{task.deadline.toLocaleDateString('vi')}</span>
+      <div className=" flex-[2]">
+        {task.createdDate.toLocaleDateString("vi")}
+      </div>
+      <div className=" flex-[2] group/date flex flex-nowrap items-center">
+        <span className="">{task.deadline.toLocaleDateString("vi")}</span>
         <input
           type="date"
           className="hidden group-hover/date:block focus:block w-6"
@@ -180,7 +210,7 @@ function Task({ task }: { task: Task }) {
           onChange={updateDeadline}
         />
       </div>
-      <div className="basis-28">
+      <div className="flex-[2]">
         <div
           className="w-6 h-6 rounded-full overflow-hidden cursor-pointer"
           key={Math.random()}
@@ -189,8 +219,8 @@ function Task({ task }: { task: Task }) {
           <Image
             height={24}
             width={24}
-            src={task.creator.image || 'https://picsum.photos/200'}
-            alt={task.creator.name || ''}
+            src={task.creator.image || "https://picsum.photos/200"}
+            alt={task.creator.name || ""}
           />
         </div>
       </div>

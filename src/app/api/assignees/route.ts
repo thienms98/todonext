@@ -15,3 +15,18 @@ export async function POST(req: NextRequest) {
     status: 'success',
   })
 }
+
+export async function DELETE(req: NextRequest) {
+  const {taskId, userId} = await req.json();
+
+  await prisma.assignees.deleteMany({
+    where: {
+      userId,
+      taskId
+    }
+  })
+
+  return NextResponse.json({
+    status: 'success'
+  })
+}
