@@ -1,15 +1,23 @@
 import {prisma} from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const accessToken = req.headers.get('authorization')?.split(' ')[1];
+  if(!accessToken) return NextResponse.json({
+    success: false,
+    status: 401,
+    message: 'Unauthorization'
+  })
+
   const users = await prisma.users.findMany({
     select: {
-      name: true,
+      id: true,
+      username: true,
       image: true
     }, orderBy: {id: 'asc'}});
 
   const json_response = {
-    status: "success",
+    success: true,
     results: users.length,
     users
   }

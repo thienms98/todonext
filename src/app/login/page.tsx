@@ -30,8 +30,7 @@ export default function Page() {
       return;
     }
     dispatch(saveInfo(data.data));
-    localStorage.setItem("accessToken", data.data.accessToken);
-    localStorage.setItem("refreshToken", data.data.refreshToken);
+    localStorage.setItem("auth", JSON.stringify(data.data));
     notification.success({ message: "Login successfully" });
     router.push("/tasks");
   };

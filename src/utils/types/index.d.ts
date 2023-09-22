@@ -1,6 +1,6 @@
 export interface User {
   id: number;
-  name: string;
+  username: string;
   image: string;
 }
 
@@ -19,12 +19,13 @@ type TaskResponse = {
   title: string;
   created_at: Date;
   due_at: Date;
+  creatorid: number;
   assignees: {
     userId: number,
     taskId: number,
     users: User
   }[];
-  creatorid: User;
+  creator: User,
   isDone: boolean;
 };
 

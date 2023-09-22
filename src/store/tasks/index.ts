@@ -15,15 +15,10 @@ const tasksSlice = createSlice({
     initTasks(state, action: PayloadAction<Task[]>){
       return action.payload
     },
-    createTask(state, action:PayloadAction<{title:string, deadline: Date, assignees: User[]}>) {
+    createTask(state, action:PayloadAction<{title:string, deadline: Date, creator:User, assignees: User[]}>) {
       const data = {
         id: Math.random() * Math.pow(10, 12),
         createdDate: new Date(),
-        creator: {
-          id: 3,
-          name: 'me',
-          image: placeholderImg
-        },
         completed: false,
         ...action.payload
       };

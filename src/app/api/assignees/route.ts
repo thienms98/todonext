@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {prisma} from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
+  const accessToken = req.headers.get('Authorization');
   const {taskId, userId} = await req.json();
   
   await prisma.assignees.create({

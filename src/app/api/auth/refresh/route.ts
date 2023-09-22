@@ -20,7 +20,7 @@ export async function POST (request: NextRequest) {
   const user = await prisma.users.findUnique({where: {username}, select: {username: true, name: true, image: true, refreshToken: true}});
   if(!user) return NextResponse.json({status: 'failure'})
 
-  if(user.refreshToken !== refreshToken || !process.env.SECRET_KEY_RF) return NextResponse.json({status: 'failure'});
+  if(!user.refreshToken || user.refreshToken !== refreshToken || !process.env.SECRET_KEY_RF) return NextResponse.json({status: 'failure'});
   const newAccessToken = sign(user, process.env.SECRET_KEY_AC, {expiresIn: '24h'})
 
   return NextResponse.json({

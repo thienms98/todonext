@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import {verify} from 'jsonwebtoken'
 
 type User = {
   username: string,
@@ -8,19 +7,27 @@ type User = {
 }
 
 export async function middleware(request: NextRequest) {
-  console.log('middleware')
-  const requestHeaders = new Headers(request.headers)
-  const accessToken = request.headers.get('Authorization')?.split(' ')[1]
-  // console.log(accessToken , process.env.SECRET_KEY)
-  if(accessToken && process.env.SECRET_KEY_AC){
-    const user = verify(accessToken, process.env.SECRET_KEY_AC)
-    // console.log('user', user)
-  }
+  console.log('middleware ', request.nextUrl.pathname)
+  const accessToken = request.cookies.get('Authorization')?.value.split(' ')[1] || request.headers.get('Authorization');
+  if(!accessToken || !process.env.SECRET_KEY_AC) return NextResponse.redirect(new URL('/login', request.url))
 
-
-  return NextResponse.next()
+  const requestHeaders = request.headers
+  requestHeaders.set('Authorization', accessToken)
+  return NextResponse.next({
+    headers: requestHeaders
+  })
+  // return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/', '/tasks'],
+  matcher: [
+  '/', 
+  '/tasks', 
+  '/api/tasks',
+  '/api/users',
+  '/api/tasks/:taskId*',
+  '/api/auth/',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+],
 }

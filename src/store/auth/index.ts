@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit";
 
 export interface Info {
+  id?: number,
   username?: string;
   name?: string;
   image?: string;
@@ -9,7 +10,7 @@ export interface Info {
   refreshToken?: string;
 }
 
-const initialState:Info = {};
+const initialState:Info = JSON.parse(localStorage.getItem('auth') || '{}');
 
 const authSlice = createSlice({
   name: 'auth',

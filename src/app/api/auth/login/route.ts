@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
+import {cookies} from 'next/headers'
 import {prisma} from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
 
@@ -9,11 +10,13 @@ export async function POST (request: NextResponse) {
   const user = await prisma.users.findFirst({
     where: {username, password},
     select: {
+      id: true,
       username: true,
       name: true,
       image: true
     }
   });
+  console.log(user)
   if(!user) return NextResponse.json({
     status: 'failure',
     message: 'Username or password is not correct'});
@@ -23,6 +26,8 @@ export async function POST (request: NextResponse) {
   const refreshToken = jwt.sign({...user, password: '*****'}, process.env.SECRET_KEY_RF)
 
   await prisma.users.update({where: {username}, data: {refreshToken}})
+
+  cookies().set('Authorization', `Bearer ${accessToken}`)
 
   return NextResponse.json({
     status: 'success',

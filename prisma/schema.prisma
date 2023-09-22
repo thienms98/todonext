@@ -24,7 +24,7 @@ model tasks {
   creatorid  Int
   isDone     Boolean     @default(false)
   assignees  assignees[]
-  creator    users?      @relation(fields: [creatorid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator    users       @relation(fields: [creatorid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {

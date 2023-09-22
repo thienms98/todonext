@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { default as TaskItem } from "@/components/Task";
@@ -17,7 +18,6 @@ import {
   faSortUp,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
-import { creator } from "@/utils/mocks/index";
 import axios from "axios";
 import { notification } from "antd";
 
@@ -50,7 +50,9 @@ const statusList: { value: Status; label: string }[] = [
 ];
 
 export default function Home(props: any) {
+  const router = useRouter();
   const tasks = useSelector((state: RootState) => state.tasks);
+  const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
 
   const [newTitle, setNewTitle] = useState<string>("");
@@ -105,32 +107,42 @@ export default function Home(props: any) {
   }, [tasks]);
 
   const createHandler = async () => {
-    const createData = { ...editData };
+    const createData = {
+      ...editData,
+      creator: {
+        id: auth.id,
+        username: auth.username,
+        image: auth.image,
+      } as User,
+    };
     if (!createData.title) return;
     if (!createData.deadline) createData.deadline = new Date();
 
     try {
-      const tasks = await axios({
-        method: "post",
-        url: `${process.env.NEXT_PUBLIC_API_URL}/tasks`,
-        data: {
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/tasks`,
+        {
           title: createData.title,
           due_at: createData.deadline,
-          creatorid: creator.id,
+          creator: createData.creator,
           assignees: createData.assignees,
         },
-      });
-      if (tasks.data.status === "failure") {
-        notification.error({ message: "Create task failed", duration: 3000 });
+        {
+          headers: { Authorization: auth.accessToken },
+        }
+      );
+      if (!data.success) {
+        notification.error({ message: "Create task failed", duration: 3 });
         return;
       }
+      console.log(data.task);
       dispatch(createTask({ ...createData }));
       notification.success({
         message: "Create task successfully",
-        duration: 3000,
+        duration: 3,
       });
     } catch (err) {
-      notification.error({ message: "Create task failed", duration: 3000 });
+      notification.error({ message: "Create task failed", duration: 3 });
     }
 
     setEditMode(false);
@@ -198,12 +210,12 @@ export default function Home(props: any) {
     <main className="min-h-screen flex flex-col px-24 pt-10">
       <div className="flex gap-4 mb-5">
         <div className="flex flex-col group/status min-w-[100px] cursor-pointer relative bg-inherit">
-          <div className="absolute w-full bg-black">
+          <div className="absolute w-full bg-white">
             <div className="capitalize  px-2">{getStatus(status)?.label}</div>
             {statusList.map((item) => (
               <div
                 key={item.value}
-                className="hidden group-hover/status:block hover:bg-gray-900  px-2"
+                className="hidden group-hover/status:block hover:bg-gray-600 hover:text-white  px-2"
                 onClick={() => setStatus(item.value)}
               >
                 {item.label}
@@ -220,7 +232,7 @@ export default function Home(props: any) {
           <input
             type="text"
             ref={searchRef}
-            className="w-[80%] pl-8 bg-transparent focus:bg-gray-600"
+            className="w-0 pl-8 bg-transparent border-2 border-transparent focus:w-[80%] focus:border-black outline-none transition-all"
             onChange={filterTask}
           />
         </div>

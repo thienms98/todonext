@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-
 import { useState, useRef, useEffect, memo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -28,6 +27,7 @@ import {
 import type { Task, User } from "@/utils/types";
 import UserSelector from "../UserSelector";
 import { notification } from "antd";
+import { RootState } from "@/store";
 
 function Task({ task }: { task: Task }) {
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -36,6 +36,7 @@ function Task({ task }: { task: Task }) {
   const titleRef = useRef<HTMLInputElement | null>(null);
   const dateRef = useRef<HTMLInputElement | null>(null);
   const dispatch = useDispatch();
+  const { accessToken } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (editMode && titleRef.current) titleRef.current.focus();
@@ -48,26 +49,23 @@ function Task({ task }: { task: Task }) {
   }, []);
 
   const updateCompleted = async () => {
-    await axios({
-      method: "put",
-      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
-      data: {
-        isDone: !task.completed,
-      },
-    });
+    await axios.put(
+      `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+      { isDone: !task.completed },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
     dispatch(changeState({ id: task.id }));
   };
 
   const updateTitle = async () => {
     setEditMode(false);
-    const res = await axios({
-      method: "put",
-      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
-      data: {
-        title,
-      },
-    });
-    if (res.data.status === "failure") {
+    const { data } = await axios.put(
+      `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+      { title },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    if (!data.success) {
       notification.error({ message: "Update failed" });
       return;
     }
@@ -78,14 +76,12 @@ function Task({ task }: { task: Task }) {
   const updateDeadline = async (e: any) => {
     const deadline = new Date(e.target.value);
     if (deadline.getTime() - new Date().getTime() >= 0) {
-      const res = await axios({
-        method: "put",
-        url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
-        data: {
-          due_at: deadline,
-        },
-      });
-      if (res.data.status === "failure") {
+      const { data } = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+        { due_at: deadline },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (!data.success) {
         notification.error({ message: "Update failed" });
         return;
       }
@@ -101,12 +97,13 @@ function Task({ task }: { task: Task }) {
   ) => {
     const method = flag === -1 ? "delete" : "post";
     const res = await axios({
-      method,
       url: `${process.env.NEXT_PUBLIC_API_URL}/assignees`,
+      method,
       data: {
         taskId: task.id,
         userId: user.id,
       },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (res.data.status === "failure") {
       notification.error({ message: "Update failed" });
@@ -117,10 +114,12 @@ function Task({ task }: { task: Task }) {
   };
 
   const deleteTask = async () => {
-    const res = await axios({
-      method: "delete",
-      url: `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
-    });
+    const res = await axios.delete(
+      `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
     if (res.data.status === "failure") {
       notification.error({ message: "Delele task failed" });
       return;
@@ -214,13 +213,14 @@ function Task({ task }: { task: Task }) {
         <div
           className="w-6 h-6 rounded-full overflow-hidden cursor-pointer"
           key={Math.random()}
-          title={task.creator.name}
+          title={task.creator.username}
         >
           <Image
             height={24}
             width={24}
             src={task.creator.image || "https://picsum.photos/200"}
-            alt={task.creator.name || ""}
+            alt={task.creator.username || ""}
+            className="h-full object-cover"
           />
         </div>
       </div>
