@@ -53,7 +53,9 @@ export async function GET(req: NextRequest) {
       ...tasks,
     }
   };
-  return NextResponse.json(json_response);
+  const res = NextResponse.json(json_response);
+  res.headers.set('Cache-Control', 'no-store')
+  return res
 }
 
 
