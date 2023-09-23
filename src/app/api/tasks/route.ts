@@ -68,14 +68,14 @@ export async function POST(req: NextRequest) {
     message: 'Unauthorization'
   })
   
-  const data:Prisma.tasksCreateInput = await req.json();
+  const data = await req.json();
   
-  const normalize_assignees: Prisma.assigneesCreateManyTasksInput | Prisma.assigneesCreateManyTasksInput[] 
+  const normalize_assignees
     = (data.assignees as {id: number}[])?.map((user) => ({userId: user.id}))
 
   const normalize_data = {
     ...data,
-    creator: {connect: data.creator as  Prisma.usersWhereUniqueInput},
+    creator: {connect: data.creator},
     assignees: {
       createMany: {
         data: normalize_assignees
