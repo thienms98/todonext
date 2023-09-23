@@ -8,7 +8,7 @@ import { RootState } from "@/store";
 import { saveInfo } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import { notification } from "antd";
-import { fetchData } from "@/utils/fetchData";
+import { User } from "@/utils/types";
 
 export default function Page() {
   const auth = useSelector((state: RootState) => state.auth);
@@ -18,7 +18,6 @@ export default function Page() {
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
   const pwRef = useRef<HTMLInputElement>(null);
 
@@ -47,12 +46,11 @@ export default function Page() {
       return;
     }
 
-    const res = await fetchData({
-      path: "/auth/register",
-      method: "post",
-      data: { username, password },
-    });
-    const data = res?.data;
+    const { data } = (await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+      { username, password }
+    )) as { data: { success: boolean; message: string; data: User } };
+
     if (!data.success) {
       notification.error({ message: data.message });
       return;

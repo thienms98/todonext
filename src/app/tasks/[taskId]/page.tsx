@@ -1,20 +1,30 @@
 "use server";
 
 import Link from "next/link";
-import { fetchData } from "@/utils/fetchData";
 import { Task } from "@/utils/types";
 import { headers } from "next/headers";
+import axios from "axios";
+import { notification } from "antd";
 
-export async function getTask(taskId: string, accessToken: string) {
-  return await fetchData({ path: `tasks/${taskId}`, accessToken });
+async function getTask(taskId: string, accessToken: string) {
+  const { data } = (await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/tasks/${taskId}`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }
+  )) as { data: { success: boolean; message?: string; task?: Task } };
+  return data;
 }
 
 export default async function Task({ params }: { params: { taskId: string } }) {
   const { taskId } = params;
   const accessToken = headers().get("authorization");
 
-  const { data }: any = await getTask(taskId, accessToken || "");
-  const { task } = data;
+  const { success, message, task }: any = await getTask(
+    taskId,
+    accessToken || ""
+  );
+  if (!success) notification.error({ message });
 
   return (
     <div className="fixed w-screen h-screen z-50">

@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import {prisma} from '@/lib/prisma'
 
-export async function POST (request: NextResponse) {
+export async function POST (request: NextRequest) {
   const data = await request.json();
   const {username, password} = data;
 

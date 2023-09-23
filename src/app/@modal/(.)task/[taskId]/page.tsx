@@ -1,7 +1,6 @@
 "use server";
 
 import { default as Modal } from "./Modal";
-import { fetchData } from "@/utils/fetchData";
 import { Info } from "@/store/auth";
 import { cookies } from "next/headers";
 import { useRouter } from "next/navigation";
