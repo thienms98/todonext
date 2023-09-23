@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers';
 
 type User = {
   username: string,
@@ -10,7 +11,9 @@ export async function middleware(request: NextRequest) {
   console.log('middleware ', request.nextUrl.pathname)
   
   const accessToken = request.cookies.get('Authorization')?.value.split(' ')[1] || request.headers.get('Authorization');
-  if(!accessToken || !process.env.SECRET_KEY_AC) return NextResponse.redirect(new URL('/login', request.url))
+  if(!accessToken || !process.env.SECRET_KEY_AC) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 
   const requestHeaders = request.headers
   requestHeaders.set('Authorization', accessToken)

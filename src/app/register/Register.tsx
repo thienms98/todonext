@@ -37,10 +37,17 @@ export default function Page() {
       pwRef.current?.focus();
       return;
     }
-    if (!password.match(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/)) {
+    if (!username.match(/^(?=.*[A-Za-z])[A-Za-z\d_]{4,}$/)) {
+      notification.error({
+        message: "username must have at least 4 characters (_ is able)",
+      });
+      pwRef.current?.focus();
+      return;
+    }
+    if (!password.match(/^(?=.*[a-z])(?=.*\d)[A-Za-z\d@$!%*?&]{4,}$/)) {
       notification.error({
         message:
-          "password must have at least 8 chars (1 number, 1 letter, symbol(@ $ ! % * ? &))",
+          "password must have at least 4 chars (1 number, 1 letter, symbol(@ $ ! % * ? &))",
       });
       pwRef.current?.focus();
       return;

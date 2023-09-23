@@ -8,6 +8,12 @@ import { Provider } from "react-redux";
 import Header from "./Header";
 import AuthWrapper from "@/components/AuthWrapper";
 import { Inter } from "next/font/google";
+import { ConfigProvider, notification } from "antd";
+
+notification.config({
+  duration: 2,
+  maxCount: 2,
+});
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,9 +34,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <Provider store={store}>
           <AuthWrapper>
-            <Header />
-            {children}
-            {modal}
+            <ConfigProvider>
+              <Header />
+              {children}
+              {modal}
+            </ConfigProvider>
           </AuthWrapper>
         </Provider>
       </body>

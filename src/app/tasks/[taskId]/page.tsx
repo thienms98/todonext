@@ -24,7 +24,7 @@ export default async function Task({ params }: { params: { taskId: string } }) {
     taskId,
     accessToken || ""
   );
-  if (!success) notification.error({ message });
+  // if (!success) notification.error({ message });
 
   return (
     <div className="fixed w-screen h-screen z-50">

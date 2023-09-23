@@ -6,7 +6,8 @@ import axios from "axios";
 import { redirect } from "next/navigation";
 import { Task, User, TaskResponse } from "@/utils/types";
 import { cookies } from "next/headers";
-import { useRouter } from "next/navigation";
+// import router from "next/router";
+// import { useRouter } from "next/router";
 
 const revalidate = 0;
 
@@ -41,11 +42,10 @@ const Task = async () => {
   console.log(authorization);
   if (!authorization) redirect("/login");
 
-  console.log("call api tasks and users");
   const todo = await getTodo({ Authorization: authorization });
   const users = await getUsers({ Authorization: authorization });
-  const router = useRouter();
-  router.refresh();
+  // const router = useRouter();
+  // router.refresh();
 
   return <Tasks todo={todo} users={users} />;
 };

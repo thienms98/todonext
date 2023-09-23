@@ -49,12 +49,15 @@ function Task({ task }: { task: Task }) {
   }, []);
 
   const updateCompleted = async () => {
-    await axios.put(
+    const { data } = (await axios.put(
       `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
       { isDone: !task.completed },
       { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+    )) as { data: { success: boolean; message: string } };
+    const { success, message } = data;
 
+    if (success) notification.success({ message });
+    else notification.error({ message });
     dispatch(changeState({ id: task.id }));
   };
 
@@ -96,7 +99,7 @@ function Task({ task }: { task: Task }) {
     user: User
   ) => {
     const method = flag === -1 ? "delete" : "post";
-    const res = await axios({
+    const { data } = await axios({
       url: `${process.env.NEXT_PUBLIC_API_URL}/assignees`,
       method,
       data: {
@@ -105,7 +108,7 @@ function Task({ task }: { task: Task }) {
       },
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (res.data.status === "failure") {
+    if (!data.success) {
       notification.error({ message: "Update failed" });
       return;
     }
