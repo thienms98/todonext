@@ -17,11 +17,6 @@ notification.config({
 
 const inter = Inter({ subsets: ["latin"] });
 
-const metadata: Metadata = {
-  title: "Todo",
-  description: "My Todo with Nextjs",
-};
-
 export default function RootLayout({
   children,
   modal,
@@ -31,6 +26,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>Todo</title>
+        <link rel="icon" href="/to-do-list.png" />
+      </head>
       <body className={inter.className}>
         <Provider store={store}>
           <AuthWrapper>
