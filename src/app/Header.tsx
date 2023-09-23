@@ -40,28 +40,31 @@ const Header = () => {
       <h1 className="text-3xl">
         <Link href="/">Todo</Link>
       </h1>
-      <div>
-        <Link href="/tasks">Tasks</Link>
-      </div>
+
       {user && Object.keys(user).length > 1 ? (
-        <div className="flex">
-          <div className="rounded-full w-6 h-6 overflow-hidden">
-            <Image
-              src={user.image || ""}
-              width={24}
-              height={24}
-              alt=""
-              className="h-full object-cover"
-            />
+        <>
+          <div>
+            <Link href="/tasks">Tasks</Link>
           </div>
-          {user.name}
-          <div
-            className="rounded-2xl px-2 py-[2px] hover:bg-slate-600 cursor-pointer"
-            onClick={logout}
-          >
-            Logout
+          <div className="flex">
+            <div className="rounded-full w-6 h-6 overflow-hidden">
+              <Image
+                src={user.image || ""}
+                width={24}
+                height={24}
+                alt=""
+                className="h-full object-cover"
+              />
+            </div>
+            {user.username}
+            <div
+              className="rounded-2xl px-2 py-[2px] hover:bg-slate-600 cursor-pointer"
+              onClick={() => logout()}
+            >
+              Logout
+            </div>
           </div>
-        </div>
+        </>
       ) : (
         <Link
           href="/login"

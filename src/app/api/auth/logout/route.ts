@@ -10,7 +10,6 @@ export async function POST (req: NextRequest){
   if(!process.env.SECRET_KEY_AC) return NextResponse.json({success: false, statusCode: 'env error'});
   const data = verify(accessToken, process.env.SECRET_KEY_AC) as {username: string}
 
-
   try{
     await prisma.users.update({where: {username: data.username}, data: {refreshToken: ''}})
     cookies().delete('Authorization')

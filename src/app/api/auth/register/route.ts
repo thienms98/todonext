@@ -3,17 +3,19 @@ import {prisma} from '@/lib/prisma'
 
 export async function POST (request: NextResponse) {
   const data = await request.json();
-  const {username, name, password} = data;
-
-  if(!name.trim() || !password.trim()) return
+  const {username, password} = data;
 
   const users = await prisma.users.findFirst({where: {username}})
-  if(users) return
-  await prisma.users.create({
+  if(users) return NextResponse.json({
+    success: false,
+    message: 'This username already exists'
+  })
+  const newUser = await prisma.users.create({
     data
   })
 
   return NextResponse.json({
-    status: 'success',
+    success: true,
+    data: newUser
   })
 }

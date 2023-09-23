@@ -1,3 +1,5 @@
+"use server";
+
 import Tasks from "./Tasks";
 import axios from "axios";
 import { redirect } from "next/navigation";
@@ -33,6 +35,7 @@ async function getUsers(headers: {}) {
 const Task = async () => {
   console.log("render tasks page");
   const authorization = cookies().get("Authorization")?.value;
+  console.log(authorization);
   if (!authorization) redirect("/login");
 
   console.log("call api tasks and users");
