@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import type { User, Task } from "@/utils/types";
+import { revalidatePath } from "next/cache";
 import {verify} from 'jsonwebtoken'
 
 export async function GET(req: NextRequest) {
+  
   // const searchParams:{limit: number, start: number} = req.nextUrl.searchParams 
   const accessToken = req.headers.get('authorization')?.split(' ')[1];
   if(!accessToken) return NextResponse.json({
@@ -53,13 +56,12 @@ export async function GET(req: NextRequest) {
       ...tasks,
     }
   };
-  const res = NextResponse.json(json_response);
-  res.headers.set('Cache-Control', 'no-store')
-  return res
+    return NextResponse.json(json_response)
 }
 
 
 export async function POST(req: NextRequest) {
+  
   const accessToken = req.headers.get('authorization')
   if(!accessToken) return NextResponse.json({
     success: false,
@@ -67,36 +69,21 @@ export async function POST(req: NextRequest) {
     message: 'Unauthorization'
   })
   
-  const data = await req.json();
+  const data:Prisma.tasksCreateInput = await req.json();
   console.log(data)
 
   try{
-    const task = await prisma.tasks.create({
-      data
-    })
+    const task = await prisma.tasks.create({data})
+    console.log('create task ---- ok');
     return NextResponse.json({
       success: true,
       task,
     })
-    // try{
-    //   await prisma.assignees.createMany({
-    //     data: assignees.map((user:User) => ({
-    //       userId: user.id,
-    //       taskId: task.id
-    //     }))
-    //   })
-      
-      
-    // }
-    // catch(err){
-    //   return NextResponse.json({
-    //     success: false,
-    //     message: err 
-    //   })
-    // }
+
   }
     catch(err){
-      return NextResponse.json({
+  console.log('create task ---- ko ok');
+  return NextResponse.json({
         success: false,
         message: err 
       })

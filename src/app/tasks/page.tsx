@@ -1,16 +1,19 @@
 "use server";
 
 import Tasks from "./Tasks";
+import { revalidatePath } from "next/cache";
 import axios from "axios";
 import { redirect } from "next/navigation";
 import { Task, User, TaskResponse } from "@/utils/types";
 import { cookies } from "next/headers";
+import { useRouter } from "next/navigation";
+
+const revalidate = 0;
 
 async function getTodo(headers: {}) {
   const { data } = await axios("http://localhost:3000/api/tasks?limit=20", {
     headers,
   });
-  console.log(data);
   // if (!data.success) redirect("/login");
   const tasks: TaskResponse[] = [];
   for (let key in data.tasks) {
@@ -41,6 +44,8 @@ const Task = async () => {
   console.log("call api tasks and users");
   const todo = await getTodo({ Authorization: authorization });
   const users = await getUsers({ Authorization: authorization });
+  const router = useRouter();
+  router.refresh();
 
   return <Tasks todo={todo} users={users} />;
 };
