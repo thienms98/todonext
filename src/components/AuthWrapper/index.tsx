@@ -9,6 +9,7 @@ const Wrapper = ({ children }: { children: ReactNode }) => {
     dispatch(
       saveInfo(JSON.parse(localStorage.getItem("auth") || "{}") as Info)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <>{children}</>;

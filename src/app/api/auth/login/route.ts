@@ -3,7 +3,7 @@ import {cookies} from 'next/headers'
 import {prisma} from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
 
-export async function POST (request: NextResponse) {
+export async function POST (request: NextRequest) {
   const data = await request.json();
   const {username, password} = data;
 
@@ -18,9 +18,11 @@ export async function POST (request: NextResponse) {
   });
   console.log(user)
   if(!user) return NextResponse.json({
-    status: 'failure',
+    success: false,
     message: 'Username or password is not correct'});
-  if(!process.env.SECRET_KEY_AC || !process.env.SECRET_KEY_RF ) return;
+  if(!process.env.SECRET_KEY_AC || !process.env.SECRET_KEY_RF ) return NextResponse.json({
+    success: false,
+    message: 'env error'});
 
   const accessToken = jwt.sign({...user, password: '*****'}, process.env.SECRET_KEY_AC, {expiresIn: '24h'})
   const refreshToken = jwt.sign({...user, password: '*****'}, process.env.SECRET_KEY_RF)
@@ -30,9 +32,8 @@ export async function POST (request: NextResponse) {
   cookies().set('Authorization', `Bearer ${accessToken}`)
 
   return NextResponse.json({
-    status: 'success',
+    success: true,
     data: {...user,
-      password: '***************',
       accessToken,
       refreshToken}
   })

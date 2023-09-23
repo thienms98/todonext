@@ -33,7 +33,7 @@ export default function Page() {
         password,
       }
     );
-    if (data.status === "failure") {
+    if (!data.success) {
       notification.error({
         message: data.message || "Username or password are not correct",
       });

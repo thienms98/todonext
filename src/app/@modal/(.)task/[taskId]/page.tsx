@@ -4,7 +4,7 @@ import { default as Modal } from "./Modal";
 import { fetchData } from "@/utils/fetchData";
 import { Info } from "@/store/auth";
 import { cookies } from "next/headers";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default async function Task({ params }: { params: { taskId: string } }) {
   // const { data: task } = await getTask(params.taskId);

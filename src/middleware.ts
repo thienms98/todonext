@@ -8,7 +8,6 @@ type User = {
 
 export async function middleware(request: NextRequest) {
   console.log('middleware ', request.nextUrl.pathname)
-  console.log('headers', request.headers);
   
   const accessToken = request.cookies.get('Authorization')?.value.split(' ')[1] || request.headers.get('Authorization');
   if(!accessToken || !process.env.SECRET_KEY_AC) return NextResponse.redirect(new URL('/login', request.url))

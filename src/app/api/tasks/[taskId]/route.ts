@@ -64,13 +64,14 @@ export async function PUT(request: NextRequest) {
   })
   try{
     await prisma.tasks.update({data, where: {id: +taskId}})
-    
+    console.log('update ----- ok')
     return NextResponse.json({
       success: true,
       message: `update task ${taskId}`
     })
   }
   catch(err){
+    console.log('update ----- ko ok')
     return NextResponse.json({
       success: false,
       message: err

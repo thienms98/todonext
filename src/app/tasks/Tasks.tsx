@@ -211,7 +211,9 @@ export default function Home(props: any) {
       <div className="flex gap-4 mb-5">
         <div className="flex flex-col group/status min-w-[100px] cursor-pointer relative bg-inherit">
           <div className="absolute w-full bg-white">
-            <div className="capitalize  px-2">{getStatus(status)?.label}</div>
+            <div className="capitalize  px-2">
+              Status: {getStatus(status)?.label}
+            </div>
             {statusList.map((item) => (
               <div
                 key={item.value}
