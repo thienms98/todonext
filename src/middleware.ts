@@ -32,7 +32,6 @@ export const config = {
   '/api/tasks',
   '/api/users',
   '/api/tasks/:taskId*',
-  '/api/auth/',
   '/api/auth/refresh',
   '/api/auth/logout',
 ],
