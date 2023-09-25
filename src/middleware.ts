@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = request.headers
   requestHeaders.set('Authorization', accessToken)
+  requestHeaders.set('Access-Control-Allow-Origin', '*')
   return NextResponse.next({
     headers: requestHeaders
   })
