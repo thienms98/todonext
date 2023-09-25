@@ -2,10 +2,8 @@ import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
-  const accessToken = req.headers.get('authorization')?.split(' ')[1];
-  if(!accessToken) return NextResponse.json({
+  if(req.headers.get('coookie')?.slice(6,)) return NextResponse.json({
     success: false,
-    status: 401,
     message: 'Unauthorization'
   })
 

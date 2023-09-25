@@ -46,10 +46,7 @@ export async function GET(request: NextRequest){
 }
 
 export async function PUT(request: NextRequest) {
-  const cookie = cookies().get('token')
-  console.log(cookies)
-  const accessToken = request.headers.get('Authorization')
-  console.log('update task     ', accessToken)
+  const accessToken = request.headers.get('cookie')?.slice(6,)
   if(!accessToken || !verifyToken(accessToken)) return NextResponse.json({
     success: false,
     message: 'Unauthorization'
@@ -65,6 +62,8 @@ export async function PUT(request: NextRequest) {
     success: false,
     message: `task title can not be empty`
   })
+  await prisma.tasks.update({data, where: {id: +taskId}})
+
   try{
     await prisma.tasks.update({data, where: {id: +taskId}})
     return NextResponse.json({
@@ -80,13 +79,15 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: NextRequest, {params}: {params: {taskId: string}}) {
 
-  const taskId = request.nextUrl.pathname.split('/').at(-1);
+  let {taskId} = params
+  const id = parseInt(taskId)
 
-  if(taskId?.trim() && +taskId){
+  if(taskId){
     try{
-      await prisma.tasks.delete({where: {id: +taskId}})
+      await prisma.assignees.deleteMany({where: {taskId: id}})
+      await prisma.tasks.delete({where: {id}})
     }
     catch(err){
       return NextResponse.json({
@@ -95,7 +96,7 @@ export async function DELETE(request: NextRequest) {
       })
     }
     return NextResponse.json({
-      status: 'success',
+      succes: true,
       message: `delete task ${taskId}`
     })
 

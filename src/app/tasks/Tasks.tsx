@@ -9,7 +9,7 @@ import { initTasks, createTask } from "@/store/tasks";
 import { initUsers } from "@/store/users";
 
 import { RootState } from "@/store";
-import type { User, Task, TaskField, TaskResponse } from "@/utils/types";
+import type { User, Task } from "@/utils/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
@@ -113,8 +113,13 @@ export default function Home(props: any) {
         id: auth.id,
         username: auth.username,
         image: auth.image,
-      } as User,
-    };
+      }
+    } as {
+      title: string,
+      deadline: Date,
+      creator: User,
+      assignees: User[]
+    }
     if (!createData.title) return;
     if (!createData.deadline) createData.deadline = new Date();
 
@@ -136,7 +141,7 @@ export default function Home(props: any) {
         return;
       }
       console.log(data.task);
-      dispatch(createTask({ ...createData }));
+      dispatch(createTask({ id: data.task.id, ...createData }));
       notification.success({
         message: "Create task successfully",
         duration: 3,

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import {verify} from 'jsonwebtoken'
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function GET(req: NextRequest) {
   // const searchParams:{limit: number, start: number} = req.nextUrl.searchParams 
-  const accessToken = req.headers.get('token')?.split(' ')[1];
-  console.log('accessToken', accessToken)
-  if(!accessToken) return NextResponse.json({
+  revalidatePath('/tasks', "page")
+  const token = req.headers.get('cookie')?.slice(6,);
+  if(!token) return NextResponse.json({
     success: false,
     status: 401,
     message: 'Unauthorization'
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
       success: false,
       message: 'env err'
     })
-  const {username} = verify(accessToken, process.env.SECRET_KEY_AC)  as {username: string}
+  const {username} = verify(token, process.env.SECRET_KEY_AC)  as {username: string}
   console.log(username)
   const tasks = await prisma.tasks.findMany({
     where: {
