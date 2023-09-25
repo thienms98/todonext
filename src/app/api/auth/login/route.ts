@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
 
 export async function POST (request: NextRequest) {
+  console.log('login to ', request.url)
   const data = await request.json();
   const {username, password} = data;
 

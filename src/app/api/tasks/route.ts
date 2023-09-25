@@ -3,7 +3,6 @@ import {verify} from 'jsonwebtoken'
 import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  console.log('get api tasks')
   // const searchParams:{limit: number, start: number} = req.nextUrl.searchParams 
   const accessToken = req.headers.get('token')?.split(' ')[1];
   console.log('accessToken', accessToken)
