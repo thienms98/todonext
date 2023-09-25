@@ -1,19 +1,22 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+let prisma: PrismaClient;
 
-async function main() {
-  // ... you will write your Prisma Client queries here
+declare global {
+  namespace NodeJS {
+    interface Global {
+      prisma: PrismaClient;
+    }
+  }
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error('error: ',e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient();
+} else {
+  if (!(global as any).prisma) {
+    (global as any).prisma = new PrismaClient();
+  }
+  prisma = (global as any).prisma;
+}
 
-export {prisma}
+export default prisma;

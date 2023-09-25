@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import {prisma} from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { verify, sign } from 'jsonwebtoken'
 
 export async function POST (request: NextRequest) {
