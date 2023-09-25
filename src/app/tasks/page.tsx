@@ -12,7 +12,7 @@ import { revalidatePath } from "next/cache";
 const revalidate = 0;
 
 async function getTodo() {
-  const { data } = await axios("http://localhost:3000/api/tasks?limit=20");
+  const { data } = await axios.get("http://localhost:3000/api/tasks?limit=20");
   // if (!data.success) redirect("/login");
   const tasks: TaskResponse[] = [];
   for (let key in data.tasks) {
@@ -29,7 +29,7 @@ async function getTodo() {
   })) as Task[];
 }
 async function getUsers() {
-  const { data } = await axios("http://localhost:3000/api/users");
+  const { data } = await axios.get("http://localhost:3000/api/users");
   // if (!data.success) redirect("/login");
   return data.users as User[];
 }
