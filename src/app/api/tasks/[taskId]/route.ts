@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from '@/lib/prisma'
 import { verifyToken } from "@/utils/verifyToken";
+import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest){
   const taskId = request.nextUrl.pathname.split('/').at(-1);
@@ -45,6 +46,8 @@ export async function GET(request: NextRequest){
 }
 
 export async function PUT(request: NextRequest) {
+  const cookie = cookies().get('token')
+  console.log(cookies)
   const accessToken = request.headers.get('Authorization')
   console.log('update task     ', accessToken)
   if(!accessToken || !verifyToken(accessToken)) return NextResponse.json({

@@ -4,7 +4,8 @@ import {verify} from 'jsonwebtoken'
 import {cookies} from 'next/headers'
 
 export async function POST (req: NextRequest){
-  const accessToken = req.headers.get('Authorization');
+  const accessToken = req.headers.get('cookie')?.slice(6,);
+  console.log(accessToken)
   if(!accessToken) return NextResponse.json({success: false, message: 'Unauthorization'});
 
   if(!process.env.SECRET_KEY_AC) return NextResponse.json({success: false, statusCode: 'env error'});
@@ -12,7 +13,7 @@ export async function POST (req: NextRequest){
 
   try{
     await prisma.users.update({where: {username: data.username}, data: {refreshToken: ''}})
-    cookies().delete('Authorization')
+    cookies().delete('token')
     return NextResponse.json({success: true, message: 'Logged out'});
   }catch(err){
     return NextResponse.json({success: false, message: err});

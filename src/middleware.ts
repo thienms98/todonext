@@ -8,16 +8,17 @@ type User = {
 }
 
 export async function middleware(request: NextRequest) {
-  console.log('middleware ', request.nextUrl.pathname)
+  console.log('middleware ', `[${request.method}]`, request.nextUrl.pathname)
   
-  const accessToken = request.cookies.get('Authorization')?.value.split(' ')[1] || request.headers.get('Authorization');
+  const accessToken = request.headers.get('cookie')?.slice(6,)
+
   if(!accessToken || !process.env.SECRET_KEY_AC) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   const requestHeaders = request.headers
-  requestHeaders.set('Authorization', accessToken)
   requestHeaders.set('Access-Control-Allow-Origin', '*')
+
   return NextResponse.next({
     headers: requestHeaders
   })
@@ -26,13 +27,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-  '/', 
-  '/tasks', 
-  '/tasks/:taskId*', 
-  '/api/tasks',
-  '/api/users',
-  '/api/tasks/:taskId*',
-  '/api/auth/refresh',
-  '/api/auth/logout',
-],
+    '/', 
+    '/tasks', 
+    '/tasks/:taskId*', 
+    '/api/tasks',
+    '/api/users',
+    '/api/tasks/:taskId*',
+    '/api/auth/refresh',
+  ],
 }

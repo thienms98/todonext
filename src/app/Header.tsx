@@ -16,13 +16,7 @@ const Header = () => {
   const logout = async () => {
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/logout`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${user.accessToken}`,
-          },
-        }
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/logout`
       );
       if (res.data.success) {
         notification.success({ message: "Logout successfully", duration: 2 });

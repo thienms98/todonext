@@ -1,13 +1,12 @@
-import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import {verify} from 'jsonwebtoken'
 import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  revalidatePath('/tasks', 'page')
+  console.log('get api tasks')
   // const searchParams:{limit: number, start: number} = req.nextUrl.searchParams 
-  const accessToken = req.headers.get('authorization')?.split(' ')[1];
+  const accessToken = req.headers.get('token')?.split(' ')[1];
+  console.log('accessToken', accessToken)
   if(!accessToken) return NextResponse.json({
     success: false,
     status: 401,
@@ -18,6 +17,7 @@ export async function GET(req: NextRequest) {
       message: 'env err'
     })
   const {username} = verify(accessToken, process.env.SECRET_KEY_AC)  as {username: string}
+  console.log(username)
   const tasks = await prisma.tasks.findMany({
     where: {
       OR: [
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       ...tasks,
     }
   };
-    return NextResponse.json(json_response)
+  return NextResponse.json(json_response)
 }
 
 

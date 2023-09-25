@@ -29,12 +29,16 @@ export async function POST (request: NextRequest) {
 
   await prisma.users.update({where: {username}, data: {refreshToken}})
 
-  cookies().set('Authorization', `Bearer ${accessToken}`)
+  const requestHeaders = request.headers;
+  // requestHeaders.set('Set-Cookie', `token=${accessToken}`)
+  cookies().set('token', accessToken)
 
   return NextResponse.json({
     success: true,
     data: {...user,
       accessToken,
-      refreshToken}
+      refreshToken
+    },
+    headers: requestHeaders
   })
 }

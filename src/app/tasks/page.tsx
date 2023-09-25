@@ -1,20 +1,18 @@
 "use server";
 
 import Tasks from "./Tasks";
-import { revalidatePath } from "next/cache";
 import axios from "axios";
 import { redirect } from "next/navigation";
 import { Task, User, TaskResponse } from "@/utils/types";
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 // import router from "next/router";
 // import { useRouter } from "next/router";
 
 const revalidate = 0;
 
-async function getTodo(headers: {}) {
-  const { data } = await axios("http://localhost:3000/api/tasks?limit=20", {
-    headers,
-  });
+async function getTodo() {
+  const { data } = await axios("http://localhost:3000/api/tasks?limit=20");
   // if (!data.success) redirect("/login");
   const tasks: TaskResponse[] = [];
   for (let key in data.tasks) {
@@ -30,20 +28,20 @@ async function getTodo(headers: {}) {
     completed: task.isDone,
   })) as Task[];
 }
-async function getUsers(headers: {}) {
-  const { data } = await axios("http://localhost:3000/api/users", { headers });
+async function getUsers() {
+  const { data } = await axios("http://localhost:3000/api/users");
   // if (!data.success) redirect("/login");
   return data.users as User[];
 }
 
 const Task = async () => {
   console.log("render tasks page");
-  const authorization = cookies().get("Authorization")?.value;
-  console.log(authorization);
-  if (!authorization) redirect("/login");
+  const token = cookies().get("token")?.value;
+  if (!token) redirect("/login");
+  revalidatePath('/tasks', 'page')
 
-  const todo = await getTodo({ Authorization: authorization });
-  const users = await getUsers({ Authorization: authorization });
+  const todo = await getTodo();
+  const users = await getUsers();
   // const router = useRouter();
   // router.refresh();
 
