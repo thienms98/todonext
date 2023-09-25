@@ -30,7 +30,7 @@ const Header = () => {
   };
 
   return (
-    <div className="flex justify-between px-24 pt-10">
+    <div className="fixed top-0 left-0 w-full flex justify-between items-center px-24 py-6 bg-white shadow-lg z-[999]">
       <h1 className="text-3xl">
         <Link href="/">Todo</Link>
       </h1>

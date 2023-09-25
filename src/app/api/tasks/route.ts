@@ -3,8 +3,19 @@ import {verify} from 'jsonwebtoken'
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
+const DEFAULT_LIMIT = 12,
+      DEFAULT_PAGE = 1;
+
 export async function GET(req: NextRequest) {
-  // const searchParams:{limit: number, start: number} = req.nextUrl.searchParams 
+  // const {page} = req.nextUrl.searchParams.getAll();
+  let limit = parseInt(req.nextUrl.searchParams.get('limit') || DEFAULT_LIMIT+'') || DEFAULT_LIMIT;
+  let page = parseInt(req.nextUrl.searchParams.get('page') || DEFAULT_PAGE+'') || DEFAULT_PAGE;
+
+  const take =  limit < 0 || limit > 20 ? DEFAULT_LIMIT: limit
+  let skip = (page - 1) * take
+  skip = skip < 0 ? 0 : skip
+
+  console.log({take, skip})
   revalidatePath('/tasks', "page")
   const token = req.headers.get('cookie')?.slice(6,);
   if(!token) return NextResponse.json({
@@ -17,9 +28,8 @@ export async function GET(req: NextRequest) {
       message: 'env err'
     })
   const {username} = verify(token, process.env.SECRET_KEY_AC)  as {username: string}
-  console.log(username)
-  const tasks = await prisma.tasks.findMany({
-    where: {
+  const [total, tasks] = await prisma.$transaction([
+    prisma.tasks.count({ where: {
       OR: [
         {
           creator: {
@@ -36,21 +46,47 @@ export async function GET(req: NextRequest) {
           }
         }
       ]
-    },
-    include: {
-      assignees: {
-        include: {
-          users: true
-        }
+    },}),
+    prisma.tasks.findMany({
+      where: {
+        OR: [
+          {
+            creator: {
+              username: username
+            },
+          },
+          {
+            assignees: {
+              some: {
+                users: {
+                  username: username
+                }
+              }
+            }
+          }
+        ]
       },
-      creator: true
-    },
-    orderBy: {id: "asc"}
-  });
+      include: {
+        assignees: {
+          include: {
+            users: true
+          }
+        },
+        creator: true
+      },
+      skip,
+      take,
+      orderBy: {id: "asc"}
+    })
+  ])
   
   let json_response = {
     sucess: true,
-    results: tasks.length,
+    pagination: {
+      pageNumber: page,
+      pageSize: limit,
+      totalCount: total
+    },
     tasks: {
       ...tasks,
     }

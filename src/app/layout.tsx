@@ -35,7 +35,9 @@ export default function RootLayout({
           <AuthWrapper>
             <ConfigProvider>
               <Header />
-              {children}
+              <div className="mt-20">
+                {children}
+              </div>
               {modal}
             </ConfigProvider>
           </AuthWrapper>

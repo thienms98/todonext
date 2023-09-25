@@ -9,7 +9,7 @@ import { initTasks, createTask } from "@/store/tasks";
 import { initUsers } from "@/store/users";
 
 import { RootState } from "@/store";
-import type { User, Task } from "@/utils/types";
+import type { User, Task, Pagination as PaginationInfo } from "@/utils/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
@@ -20,6 +20,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { notification } from "antd";
+import Pagination from "@/components/Pagination";
 
 interface EditData {
   title: string;
@@ -49,11 +50,12 @@ const statusList: { value: Status; label: string }[] = [
   },
 ];
 
-export default function Home(props: any) {
+export default function Home(props: {pagination: PaginationInfo, todo: Task[], users: User[]}) {
   const router = useRouter();
   const tasks = useSelector((state: RootState) => state.tasks);
   const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
+  console.log('render tasks pagination', props.pagination)
 
   const [newTitle, setNewTitle] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -86,13 +88,17 @@ export default function Home(props: any) {
       }
     };
 
-    dispatch(initTasks(props.todo));
     dispatch(initUsers(props.users));
 
     window.addEventListener("click", handler);
     return () => window.removeEventListener("click", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    dispatch(initTasks(props.todo));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.todo])
 
   useEffect(() => {
     setEditData((prev) => ({ ...prev, title: newTitle }));
@@ -324,6 +330,7 @@ export default function Home(props: any) {
           + New task
         </div>
       )}
+      <Pagination pagination={props.pagination} />
     </main>
   );
 }

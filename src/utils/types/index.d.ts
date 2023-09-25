@@ -29,5 +29,6 @@ type TaskResponse = {
   isDone: boolean;
 };
 
+export interface Pagination{totalCount: number, pageNumber: number, pageSize: number}
 
 export type TaskField = 'id' | 'title' | 'createdDate' | 'deadline' | 'creator' | 'assignees' | 'completed'
