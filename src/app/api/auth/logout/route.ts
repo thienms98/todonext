@@ -5,7 +5,6 @@ import {cookies} from 'next/headers'
 
 export async function POST (req: NextRequest){
   const accessToken = req.headers.get('cookie')?.slice(6,);
-  console.log(accessToken)
   if(!accessToken) return NextResponse.json({success: false, message: 'Unauthorization'});
 
   if(!process.env.SECRET_KEY_AC) return NextResponse.json({success: false, statusCode: 'env error'});
