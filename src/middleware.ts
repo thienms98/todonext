@@ -24,7 +24,6 @@ export async function middleware(request: NextRequest) {
       'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   )
   return res
-  // return NextResponse.next()
 }
 
 export const config = {
