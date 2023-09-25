@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   
-  const accessToken = req.headers.get('authorization')
+  const accessToken = req.headers.get('cookie')?.slice(6,)
   if(!accessToken) return NextResponse.json({
     success: false,
     status: 401,
