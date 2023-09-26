@@ -9,7 +9,7 @@ import { Task, User, TaskResponse, Pagination } from "@/utils/types";
 async function getTodo(token: string, searchParams: {limit: string, page: string}) {
   const {limit = 12, page = 0} = searchParams
   console.log(limit, page)
-  const { data } = await axios.get(`http://localhost:3000/api/tasks?limit=${limit}&page=${page}`, {
+  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tasks?limit=${limit}&page=${page}`, {
     headers: {
       'cookie': `token=${token}`
     }
@@ -34,7 +34,7 @@ async function getTodo(token: string, searchParams: {limit: string, page: string
   } as {tasks: Task[], pagination: Pagination};
 }
 async function getUsers(token: string) {
-  const { data } = await axios.get("http://localhost:3000/api/users", {
+  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
     headers: {
       'cookie': `token=${token}`
     }
