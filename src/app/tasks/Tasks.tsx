@@ -135,7 +135,7 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
 
     try {
       const { data } = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/tasks`,
+        `/api/tasks`,
         {
           title: createData.title,
           due_at: createData.deadline,

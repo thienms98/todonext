@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState, useEffect, useRef } from "react";
-// import axios from "axios";
-import instance from "@/lib/request";
+import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { saveInfo } from "@/store/auth";
@@ -30,8 +29,8 @@ export default function Page() {
 
   const login = async (e: FormEvent<Element>) => {
     e.preventDefault();
-    const { data } = await instance.post(
-      `/auth/login`,
+    const { data } = await axios.post(
+      '/auth/login',
       {
         username,
         password,

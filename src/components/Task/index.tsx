@@ -67,7 +67,7 @@ function Task({ task }: { task: Task }) {
   const updateTitle = async () => {
     setEditMode(false);
     const { data } = await axios.put(
-      `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+      `/api/tasks/${task.id}`,
       { title },
       { headers: { 
         Authorization: `Bearer ${accessToken}`,
@@ -86,7 +86,7 @@ function Task({ task }: { task: Task }) {
     const deadline = new Date(e.target.value);
     if (deadline.getTime() - new Date().getTime() >= 0) {
       const { data } = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+        `/api/tasks/${task.id}`,
         { due_at: deadline },
         { headers: { Authorization: `Bearer ${accessToken}`, 
         'Content-Type': 'application/json', } }
@@ -107,7 +107,7 @@ function Task({ task }: { task: Task }) {
   ) => {
     const method = flag === -1 ? "delete" : "post";
     const { data } = await axios({
-      url: `${process.env.NEXT_PUBLIC_API_URL}/assignees`,
+      url: `/api/assignees`,
       method,
       data: {
         taskId: task.id,
@@ -126,7 +126,7 @@ function Task({ task }: { task: Task }) {
 
   const deleteTask = async () => {
     const res = await axios.delete(
-      `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+      `/api/tasks/${task.id}`,
       {
         headers: { Authorization: `Bearer ${accessToken}`, 
         'Content-Type': 'application/json', },

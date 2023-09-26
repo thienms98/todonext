@@ -12,7 +12,7 @@ import { notification } from "antd";
 async function getTask(taskId: string, token?: string) {
   if(!token) return null
   const {data} = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/tasks/${taskId}`,
+    `/api/tasks/${taskId}`,
     {headers: {'cookie': `token=${token}`}}
   ) as { data: { success: boolean; message?: string; task?: Task } };
   return data;

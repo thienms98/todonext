@@ -57,7 +57,7 @@ export default function Page() {
     }
 
     const { data } = (await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+      '/api/auth/register',
       { username, password }
     )) as { data: { success: boolean; message: string; data: User } };
 

@@ -5,11 +5,13 @@ import { redirect } from "next/navigation";
 import Tasks from "./Tasks";
 import axios from "axios";
 import { Task, User, TaskResponse, Pagination } from "@/utils/types";
+import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 async function getTodo(token: string, searchParams: {limit: string, page: string}) {
   const {limit = 12, page = 0} = searchParams
   console.log(limit, page)
-  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tasks?limit=${limit}&page=${page}`, {
+  const { data } = await axios.get(`/api/tasks?limit=${limit}&page=${page}`, {
     headers: {
       'cookie': `token=${token}`
     }
@@ -34,7 +36,7 @@ async function getTodo(token: string, searchParams: {limit: string, page: string
   } as {tasks: Task[], pagination: Pagination};
 }
 async function getUsers(token: string) {
-  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+  const { data } = await axios.get(`/api/users`, {
     headers: {
       'cookie': `token=${token}`
     }
@@ -48,6 +50,29 @@ const Task = async ({searchParams}: {searchParams: {limit: string, page: string}
 
   const token = headers().get('cookie')?.slice(6)
   if(!token) redirect('/login')
+
+  // let array:Prisma.tasksCreateInput[] = []
+  // for(let i=0; i<=100; i++){
+  //   array.push({
+  //     title: `task 00_${i}`,
+  //     due_at: new Date('09/28/2023'),
+  //     creator: {
+  //       connect: {
+  //         id: 4
+  //       }
+  //     },
+  //     assignees: {
+  //       createMany: {
+  //         data: [
+  //           { userId: 1 },
+  //           { userId: 2 },
+  //           { userId: 6 },
+  //         ]
+  //       }
+  //     }
+  //   })
+  // }
+  // await prisma.tasks.createMany({data: array})
 
   const {tasks, pagination} = await getTodo(token, searchParams);
   const users = await getUsers(token);
