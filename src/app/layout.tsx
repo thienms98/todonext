@@ -1,7 +1,6 @@
 "use client";
 
 import "./globals.css";
-import type { Metadata } from "next";
 import { store } from "@/store";
 import { Provider } from "react-redux";
 

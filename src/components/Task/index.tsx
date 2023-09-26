@@ -50,7 +50,7 @@ function Task({ task }: { task: Task }) {
 
   const updateCompleted = async () => {
     const { data } = (await axios.put(
-      `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
+      `/api/tasks/${task.id}`,
       { isDone: !task.completed },
       { headers: { 
         Authorization: `Bearer ${accessToken}` ,
