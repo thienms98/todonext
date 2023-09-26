@@ -8,12 +8,14 @@ type User = {
 
 export async function middleware(request: NextRequest) {
   console.log('middleware ', `[${request.method}]`, request.nextUrl.pathname)
+  if(request.method === 'OPTIONS') return NextResponse.json({}, {status: 200})
   
   const token = request.headers.get('cookie')?.slice(6)
 
   if(!token || !process.env.SECRET_KEY_AC) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
+
 
   const res = NextResponse.next()
   res.headers.append('Access-Control-Allow-Credentials', "true")
