@@ -205,9 +205,8 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
   useEffect(() => {
     const url = new URL(window.location.href);
     url.searchParams.set('limit', limit.toString())
-    console.log(url.href)
     router.push(url.href)
-  }, [limit])
+  }, [limit, router])
 
   const changeSort = (callback: any) => {
     callback((prev: -1 | 0 | 1) => (prev + 1 > 1 ? -1 : prev + 1));
