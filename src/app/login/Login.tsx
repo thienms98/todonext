@@ -23,10 +23,6 @@ export default function Page() {
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
   const login = async (e: FormEvent<Element>) => {
     e.preventDefault();
     const { data } = await axios.post(
