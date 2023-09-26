@@ -52,7 +52,10 @@ function Task({ task }: { task: Task }) {
     const { data } = (await axios.put(
       `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
       { isDone: !task.completed },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
+      { headers: { 
+        Authorization: `Bearer ${accessToken}` ,
+        'Content-Type': 'application/json',
+      } }
     )) as { data: { success: boolean; message: string } };
     const { success, message } = data;
 
@@ -66,7 +69,10 @@ function Task({ task }: { task: Task }) {
     const { data } = await axios.put(
       `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
       { title },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
+      { headers: { 
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      ,} }
     );
     if (!data.success) {
       notification.error({ message: "Update failed" });
@@ -82,7 +88,8 @@ function Task({ task }: { task: Task }) {
       const { data } = await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
         { due_at: deadline },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { headers: { Authorization: `Bearer ${accessToken}`, 
+        'Content-Type': 'application/json', } }
       );
       if (!data.success) {
         notification.error({ message: "Update failed" });
@@ -106,7 +113,8 @@ function Task({ task }: { task: Task }) {
         taskId: task.id,
         userId: user.id,
       },
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}`, 
+      'Content-Type': 'application/json', },
     });
     if (!data.success) {
       notification.error({ message: "Update failed" });
@@ -120,7 +128,8 @@ function Task({ task }: { task: Task }) {
     const res = await axios.delete(
       `${process.env.NEXT_PUBLIC_API_URL}/tasks/${task.id}`,
       {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${accessToken}`, 
+        'Content-Type': 'application/json', },
       }
     );
     if (res.data.status === "failure") {

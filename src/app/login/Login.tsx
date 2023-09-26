@@ -34,7 +34,10 @@ export default function Page() {
       {
         username,
         password,
-      }
+      },
+      {headers: {
+        'Content-Type': 'application/json'
+      }}
     );
     if (!data.success) {
       notification.error({
