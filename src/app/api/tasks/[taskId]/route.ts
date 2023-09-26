@@ -3,8 +3,8 @@ import prisma from '@/lib/prisma'
 import { verifyToken } from "@/utils/verifyToken";
 import { cookies } from "next/headers";
 
-export async function GET(request: NextRequest){
-  const taskId = request.nextUrl.pathname.split('/').at(-1);
+export async function GET(request: NextRequest, {params}: {params: {taskId: string}}){
+  const {taskId} = params
 
   if(taskId?.trim() && +taskId){
     let task = await prisma.tasks.findUnique({
@@ -31,8 +31,16 @@ export async function GET(request: NextRequest){
       }
     })
     if(task) return NextResponse.json({
-      status: 'success',
-      task
+      success: true,
+      task: {
+        id: task.id,
+        title: task.title,
+        createdDate: task.created_at,
+        deadline: task.due_at,
+        creator: task.creator,
+        assignees: task.assignees,
+        completed: task.isDone
+      }
     })
     else return NextResponse.json({
       success: false,

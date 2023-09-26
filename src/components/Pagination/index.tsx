@@ -22,14 +22,19 @@ const Pagination = ({pagination}: {pagination: PaginationInfo}) => {
   }, [page, pathname, router])
 
   return <div className='flex flex-row justify-center gap-2'>
-    <div 
-      className='px-2 hover:bg-gray-200 cursor-pointer' 
+    {page > 1 ? <div 
+      className='px-2 hover:bg-gray-200 cursor-pointer shadow-md' 
       onClick={()=>{setPage(prev => prev - 1 < 1 ? 1 : prev-1 )}}>&lt;</div>
-    <span>Page <form className='inline'><input type="number" className='inline w-12' value={page} onChange={(e:any) => setPage(e.target.value)} /></form>/{pageCount}</span>
-    <div 
-      className='px-2 hover:bg-gray-200 cursor-pointer' 
+      : <div 
+      className='px-2 bg-gray-400 cursor-not-allowed'>&lt;</div>
+    }
+    <span>Page <form className='inline'><input type="number" className='inline w-12' value={page} onChange={(e:any) => setPage(e.target.value < 1 ? 1 : e.target.value > pageCount ? pageCount : e.target.value)} /></form>/{pageCount}</span>
+    {page < pageCount ? <div 
+      className='px-2 hover:bg-gray-200 cursor-pointer shadow-md' 
       onClick={()=>{setPage(prev => prev + 1 > pageCount ? pageCount : prev+1 )}}>&gt;</div>
+    : <div 
+    className='px-2 bg-gray-400 cursor-not-allowed'>&gt;</div>}
   </div>
 }
 
-export default Pagination
+export default memo(Pagination)

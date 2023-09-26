@@ -49,19 +49,22 @@ const statusList: { value: Status; label: string }[] = [
     label: "Complete",
   },
 ];
+const limitList: number[] = [12, 20, 50]
 
 export default function Home(props: {pagination: PaginationInfo, todo: Task[], users: User[]}) {
   const router = useRouter();
   const tasks = useSelector((state: RootState) => state.tasks);
   const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-  console.log('render tasks pagination', props.pagination)
+  console.log('render tasks')
 
   const [newTitle, setNewTitle] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editData, setEditData] = useState<EditData>(defaultData);
   const [filterSearch, setFilterSearch] = useState<string>("");
   const [todo, setTodo] = useState<Task[]>([...tasks]);
+  const [limit, setLimit] = useState<number>(props.pagination.pageSize)
+  const [showLimit, setShowLimit] = useState<boolean>(false);
 
   const [status, setStatus] = useState<Status>(0);
   const [createdDateSort, setCreatedDateSort] = useState<-1 | 0 | 1>(0);
@@ -71,6 +74,7 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
   const createBtnRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const limitRef = useRef<HTMLButtonElement>(null)
 
   const getAssignees: Function = (assignees: User[]) => {
     setEditData((prev) => ({ ...prev, assignees }));
@@ -198,6 +202,13 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
     });
   }, [status, filterSearch, createdDateSort, deadlineSort, tasks]);
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('limit', limit.toString())
+    console.log(url.href)
+    router.push(url.href)
+  }, [limit])
+
   const changeSort = (callback: any) => {
     callback((prev: -1 | 0 | 1) => (prev + 1 > 1 ? -1 : prev + 1));
   };
@@ -218,13 +229,14 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
   };
 
   return (
-    <main className="min-h-screen flex flex-col px-24 pt-10">
+    <main className="flex flex-col px-24 pt-10">
       <div className="flex gap-4 mb-5">
-        <div className="flex flex-col group/status min-w-[100px] cursor-pointer relative bg-inherit">
+        <div className="flex flex-col group/status min-w-[120px] cursor-pointer relative bg-inherit">
           <div className="absolute w-full bg-white">
-            <div className="capitalize  px-2">
+            <div className="capitalize shadow-md px-4 py-[6px]">
               Status: {getStatus(status)?.label}
             </div>
+            <div className="shadow-md">
             {statusList.map((item) => (
               <div
                 key={item.value}
@@ -234,6 +246,7 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
                 {item.label}
               </div>
             ))}
+            </div>
           </div>
         </div>
         <div className="relative max-w-xs">
@@ -248,6 +261,27 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
             className="w-0 pl-8 bg-transparent border-2 border-transparent focus:w-[80%] focus:border-black outline-none transition-all"
             onChange={filterTask}
           />
+        </div>
+        <div className="flex-1"></div>
+        <div className="relative">
+          <label htmlFor="checkbox" className="bg-white shadow-md px-4 py-2">
+            Tasks/page: {limit}
+          </label>
+          <input type="checkbox" hidden id="checkbox" onChange={e => setShowLimit(e.target.checked)} />
+          {showLimit && <div className="flex flex-col absolute top-[100%] right-0 bg-white shadow-md min-w-[40px]">
+            {limitList.map(limit => (
+              <div 
+                key={limit} 
+                onClick={()=>{
+                  setLimit(limit); 
+                  setShowLimit(false)}
+                } 
+                className="cursor-pointer hover:bg-gray-200 text-right px-3"
+              >
+                {limit}
+              </div>))
+            }
+          </div>}
         </div>
       </div>
       <div className="flex border-b-2">

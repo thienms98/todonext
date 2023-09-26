@@ -8,6 +8,8 @@ import { RootState } from "@/store";
 import { saveInfo } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import { notification } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 export default function Page() {
   const auth = useSelector((state: RootState) => state.auth);
@@ -17,6 +19,7 @@ export default function Page() {
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPw, setShowPw] = useState<boolean>(false);
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -53,27 +56,26 @@ export default function Page() {
         onSubmit={(e: FormEvent<Element>) => login(e)}
       >
         <h1 className="my-4 font-black text-2xl">Login</h1>
-        <label htmlFor="username">
-          <input
-            className="w-full border-b-2 border-black outline-none pl-4 pb-1"
-            type="text"
-            value={username}
-            placeholder="username"
-            onChange={(e) => setUsername(e.target.value)}
-            ref={inputRef}
-            tabIndex={1}
-          />
-        </label>
-        <label htmlFor="password">
+        <input
+          className="w-full border-b-2 border-black outline-none pl-4 pb-1"
+          type="text"
+          value={username}
+          placeholder="username"
+          onChange={(e) => setUsername(e.target.value)}
+          ref={inputRef}
+          tabIndex={1}
+        />
+        <div className="relative w-full">
           <input
             className="w-full border-b-2 border-black outline-none pl-4 pb-1 mt-2"
-            type="password"
+            type={showPw ? 'text' : "password"}
             value={password}
             placeholder="password"
             onChange={(e) => setPassword(e.target.value)}
             tabIndex={2}
           />
-        </label>
+          <FontAwesomeIcon icon={showPw ? faEyeSlash : faEye} className="absolute right-0 top-[50%] translate-y-[-50%]" onClick={() => setShowPw(prev=>!prev)} />
+        </div>
         <div className="flex justify-end w-full mt-2">
           <Link className="hover:underline text-xs" href="/register">
             Create new account

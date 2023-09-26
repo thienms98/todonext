@@ -9,7 +9,7 @@ type User = {
 export async function middleware(request: NextRequest) {
   console.log('middleware ', `[${request.method}]`, request.nextUrl.pathname)
   
-  const token = request.headers.get('cookie')?.slice(6,)
+  const token = request.headers.get('cookie')?.slice(6)
 
   if(!token || !process.env.SECRET_KEY_AC) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
       'Access-Control-Allow-Headers',
       'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   )
+  console.log('next')
   return res
 }
 

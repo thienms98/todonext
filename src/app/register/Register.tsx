@@ -9,6 +9,8 @@ import { saveInfo } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import { notification } from "antd";
 import { User } from "@/utils/types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 export default function Page() {
   const auth = useSelector((state: RootState) => state.auth);
@@ -18,6 +20,7 @@ export default function Page() {
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPw, setShowPw] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const pwRef = useRef<HTMLInputElement>(null);
 
@@ -74,26 +77,26 @@ export default function Page() {
         onSubmit={(e: FormEvent<Element>) => register(e)}
       >
         <h1 className="my-4 font-black text-2xl">Register</h1>
-        <label htmlFor="username">
+        <input
+          className="w-full border-b-2 border-black outline-none pl-4 pb-1"
+          type="text"
+          value={username}
+          placeholder="username"
+          onChange={(e) => setUsername(e.target.value)}
+          ref={inputRef}
+          tabIndex={1}
+        />
+        <div className="relative w-full">
           <input
-            className="border-b-2 border-black outline-none pl-4 pb-1"
-            type="text"
-            value={username}
-            placeholder="username"
-            onChange={(e) => setUsername(e.target.value)}
-            ref={inputRef}
-          />
-        </label>
-        <label htmlFor="password">
-          <input
-            className="border-b-2 border-black outline-none pl-4 pb-1 mt-2"
-            type="password"
+            className="w-full border-b-2 border-black outline-none pl-4 pb-1 mt-2"
+            type={showPw ? 'text' : "password"}
             value={password}
             placeholder="password"
             onChange={(e) => setPassword(e.target.value)}
-            ref={pwRef}
+            tabIndex={2}
           />
-        </label>
+          <FontAwesomeIcon icon={showPw ? faEyeSlash : faEye} className="absolute right-0 top-[50%] translate-y-[-50%]" onClick={() => setShowPw(prev=>!prev)} />
+        </div>
         <input
           type="submit"
           value="Signup"
