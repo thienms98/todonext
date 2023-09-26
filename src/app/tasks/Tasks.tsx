@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useState, useRef, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { default as TaskItem } from "@/components/Task";
 import UserSelector from "@/components/UserSelector";
@@ -51,9 +51,11 @@ const statusList: { value: Status; label: string }[] = [
 ];
 const limitList: number[] = [12, 20, 50]
 
-export default function Home(props: {pagination: PaginationInfo, todo: Task[], users: User[]}) {
+export default function Home() {
   const router = useRouter();
-  const tasks = useSelector((state: RootState) => state.tasks);
+  const pathname = usePathname()
+    const searchParams = useSearchParams()
+    // const tasks = useSelector((state: RootState) => state.tasks);
   const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   console.log('render tasks')
@@ -62,8 +64,9 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editData, setEditData] = useState<EditData>(defaultData);
   const [filterSearch, setFilterSearch] = useState<string>("");
-  const [todo, setTodo] = useState<Task[]>([...tasks]);
-  const [limit, setLimit] = useState<number>(props.pagination.pageSize)
+  const [todo, setTodo] = useState<Task[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo>()
+  const [limit, setLimit] = useState<number>(pagination?.pageSize || 12)
   const [showLimit, setShowLimit] = useState<boolean>(false);
 
   const [status, setStatus] = useState<Status>(0);
@@ -80,6 +83,35 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
     setEditData((prev) => ({ ...prev, assignees }));
   };
 
+  const fetchData = useCallback((url:string) => {
+    axios.get(url)
+      .then(({data}) => {
+        console.log(data)
+        if(!data.success) return
+        const {tasks, pagination} = data
+        const normalize_tasks:Task[] = Object.keys(tasks).map(key => {
+          const task = tasks[key]
+          return {
+            id: task.id,
+            title: task.title,
+            createdDate: new Date(task.created_at),
+            deadline: new Date(task.due_at),
+            creator: task.creator,
+            assignees: task.assignees.map((user: {users: User}) => user.users),
+            completed: task.isDone
+          }
+        })
+        console.log(normalize_tasks)
+        dispatch(initTasks(normalize_tasks));
+        setTodo(normalize_tasks)
+        setPagination(pagination)
+      })
+  }, [])
+
+  useEffect(() => {
+    fetchData(`/api${pathname}?${searchParams.toString()}`)
+  }, [pathname, searchParams, fetchData])
+
   useEffect(() => {
     const handler: EventListener = (e: any) => {
       if (
@@ -92,17 +124,12 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
       }
     };
 
-    dispatch(initUsers(props.users));
+    axios.get('/api/users').then(({data}) => dispatch(initUsers(data.users)))
 
     window.addEventListener("click", handler);
     return () => window.removeEventListener("click", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    dispatch(initTasks(props.todo));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.todo])
 
   useEffect(() => {
     setEditData((prev) => ({ ...prev, title: newTitle }));
@@ -112,9 +139,9 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
     if (editMode) titleRef.current?.focus();
   }, [editMode]);
 
-  useEffect(() => {
-    setTodo(tasks);
-  }, [tasks]);
+  // useEffect(() => {
+  //   setTodo(tasks);
+  // }, [tasks]);
 
   const createHandler = async () => {
     const createData = {
@@ -175,32 +202,20 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
     setFilterSearch(e.target.value);
   };
   useEffect(() => {
-    setTodo((prev) => {
-      let result: Task[];
-      if (!filterSearch.trim()) result = [...tasks];
-      else
-        result = [...tasks].filter((item) => item.title.includes(filterSearch));
-      if (result.length === 0) result = [...tasks];
-      if (status !== 0)
-        result = [...result].filter((task) => {
-          if (status === 1) return task.completed;
-          if (status === -1) return !task.completed;
-        });
-      if (createdDateSort !== 0) {
-        result.sort(
-          (a, b) =>
-            (a.createdDate.getTime() - b.createdDate.getTime()) *
-            createdDateSort
-        );
-      }
-      if (deadlineSort !== 0) {
-        result.sort(
-          (a, b) => (a.deadline.getTime() - b.deadline.getTime()) * deadlineSort
-        );
-      }
-      return result;
-    });
-  }, [status, filterSearch, createdDateSort, deadlineSort, tasks]);
+    const params = new URLSearchParams();
+    if(filterSearch?.trim()) params.set('q', filterSearch.trim())
+    if(status) params.set('isDone', status === 1 ? '1' : '0')
+    if(createdDateSort) {
+      params.set('sortBy', 'created_at')
+      params.set('sort', createdDateSort === 1 ? 'asc' : 'desc')
+    }
+    if(deadlineSort) {
+      params.set('sortBy', 'due_at')
+      params.set('sort', deadlineSort === 1 ? 'asc' : 'desc')
+    }
+    if(limit) params.set('limit', limit.toString())
+    router.push(`${pathname}?${params.toString()}`)
+  }, [status, filterSearch, createdDateSort, deadlineSort, limit, pathname, router]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -257,8 +272,13 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
           <input
             type="text"
             ref={searchRef}
-            className="w-0 pl-8 bg-transparent border-2 border-transparent focus:w-[80%] focus:border-black outline-none transition-all"
+            className={
+              filterSearch.trim()
+              ? "w-[80%] pl-8 bg-transparent border-2 border-black outline-none transition-all"
+              : "w-0 pl-8 bg-transparent border-2 border-transparent focus:w-[80%] focus:border-black outline-none transition-all"
+            }
             onChange={filterTask}
+            value={filterSearch}
           />
         </div>
         <div className="flex-1"></div>
@@ -363,7 +383,7 @@ export default function Home(props: {pagination: PaginationInfo, todo: Task[], u
           + New task
         </div>
       )}
-      <Pagination pagination={props.pagination} />
+      {pagination && <Pagination pagination={pagination} />}
     </main>
   );
 }

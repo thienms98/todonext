@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import {verify} from 'jsonwebtoken'
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 const DEFAULT_LIMIT = 12,
       DEFAULT_PAGE = 1;
 
 export async function GET(req: NextRequest) {
-  // const {page} = req.nextUrl.searchParams.getAll();
-  let limit = parseInt(req.nextUrl.searchParams.get('limit') || DEFAULT_LIMIT+'') || DEFAULT_LIMIT;
-  let page = parseInt(req.nextUrl.searchParams.get('page') || DEFAULT_PAGE+'') || DEFAULT_PAGE;
-
-  const take =  limit < 0 || limit > 20 ? DEFAULT_LIMIT: limit
-  let skip = (page - 1) * take
+  const {limit = DEFAULT_LIMIT, page = DEFAULT_PAGE, q, sortBy = 'id', sort = 'asc', isDone} = 
+  JSON.parse('{"' + decodeURI(req.nextUrl.searchParams.toString()).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+  const take =  limit < 0 || limit > 20 ? DEFAULT_LIMIT : +limit
+  let skip = (+page - 1) * take
   skip = skip < 0 ? 0 : skip
 
   console.log({take, skip})
@@ -28,60 +27,66 @@ export async function GET(req: NextRequest) {
       message: 'env err'
     })
   const {username} = verify(token, process.env.SECRET_KEY_AC)  as {username: string}
-  const [total, tasks] = await prisma.$transaction([
-    prisma.tasks.count({ where: {
-      OR: [
-        {
-          creator: {
-            username: username
-          },
+
+  const where:Prisma.tasksWhereInput = {
+    title: {
+      contains: q
+    },
+    OR: [
+      {
+        creator: {
+          username: username
         },
-        {
-          assignees: {
-            some: {
-              users: {
-                username: username
-              }
+      },
+      {
+        assignees: {
+          some: {
+            users: {
+              username: username
             }
           }
         }
-      ]
-    },}),
+      }
+    ]
+  }
+  if(isDone) where.isDone = isDone === 1 ? true : false
+
+  const [total, tasks] = await prisma.$transaction([
+    prisma.tasks.count({ 
+      where
+    }),
     prisma.tasks.findMany({
-      where: {
-        OR: [
-          {
-            creator: {
-              username: username
-            },
-          },
-          {
-            assignees: {
-              some: {
-                users: {
-                  username: username
-                }
-              }
-            }
-          }
-        ]
-      },
+      where,
       include: {
         assignees: {
           include: {
-            users: true
+            users: {
+              select: {
+                id: true,
+                username: true,
+                image: true
+              }
+            }
           }
         },
-        creator: true
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            image: true
+          }
+        }
       },
       skip,
       take,
-      orderBy: {id: "asc"}
+      orderBy: {
+        [sortBy]: sort
+      }
     })
   ])
   
   let json_response = {
-    sucess: true,
+    success: true,
     pagination: {
       pageNumber: page,
       pageSize: limit,
