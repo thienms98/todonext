@@ -30,7 +30,7 @@ export default function Page() {
   const login = async (e: FormEvent<Element>) => {
     e.preventDefault();
     const { data } = await axios.post(
-      '/auth/login',
+      '/api/auth/login',
       {
         username,
         password,

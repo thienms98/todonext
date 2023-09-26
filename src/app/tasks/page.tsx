@@ -51,28 +51,18 @@ const Task = async ({searchParams}: {searchParams: {limit: string, page: string}
   const token = headers().get('cookie')?.slice(6)
   if(!token) redirect('/login')
 
-  // let array:Prisma.tasksCreateInput[] = []
-  // for(let i=0; i<=100; i++){
-  //   array.push({
-  //     title: `task 00_${i}`,
-  //     due_at: new Date('09/28/2023'),
-  //     creator: {
-  //       connect: {
-  //         id: 4
-  //       }
-  //     },
-  //     assignees: {
-  //       createMany: {
-  //         data: [
-  //           { userId: 1 },
-  //           { userId: 2 },
-  //           { userId: 6 },
-  //         ]
-  //       }
-  //     }
-  //   })
-  // }
-  // await prisma.tasks.createMany({data: array})
+  // let array:Prisma.tasksCreateInput[] = [
+  //   {
+  //     title?: string | null | undefined;
+  //     created_at?: string | Date | null | undefined;
+  //     due_at?: string | Date | null | undefined;
+  //     isDone?: boolean | undefined;
+  //     assignees?: Prisma.assigneesCreateNestedManyWithoutTasksInput | undefined;
+  //     creator: Prisma.usersCreateNestedOneWithoutTasksInput;
+  //   }
+  // ]
+ 
+  // await prisma.tasks.createMany(array)
 
   const {tasks, pagination} = await getTodo(token, searchParams);
   const users = await getUsers(token);
