@@ -16,6 +16,7 @@ import {
   faSort,
   faSortDown,
   faSortUp,
+  faSpinner,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
@@ -27,7 +28,7 @@ interface EditData {
   deadline: Date;
   assignees: User[];
 }
-type Status = 0 | 1 | -1;
+type Switch = 0 | 1 | -1;
 
 const defaultData: EditData = {
   title: "",
@@ -35,7 +36,7 @@ const defaultData: EditData = {
   assignees: [],
 };
 
-const statusList: { value: Status; label: string }[] = [
+const statusList: { value: Switch; label: string }[] = [
   {
     value: 0,
     label: "All",
@@ -54,24 +55,27 @@ const limitList: number[] = [12, 20, 50]
 export default function Home() {
   const router = useRouter();
   const pathname = usePathname()
-    const searchParams = useSearchParams()
-    // const tasks = useSelector((state: RootState) => state.tasks);
+  const searchParams = useSearchParams()
+  const tasks = useSelector((state: RootState) => state.tasks);
   const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   console.log('render tasks')
 
+  const [todo, setTodo] = useState<Task[]>(tasks)
   const [newTitle, setNewTitle] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editData, setEditData] = useState<EditData>(defaultData);
   const [filterSearch, setFilterSearch] = useState<string>("");
-  const [todo, setTodo] = useState<Task[]>([]);
+  const [searchText, setSearchText] = useState<string>("");
   const [pagination, setPagination] = useState<PaginationInfo>()
+  const [page, setPage] = useState<number>(1)
   const [limit, setLimit] = useState<number>(pagination?.pageSize || 12)
   const [showLimit, setShowLimit] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const [status, setStatus] = useState<Status>(0);
-  const [createdDateSort, setCreatedDateSort] = useState<-1 | 0 | 1>(0);
-  const [deadlineSort, setDeadlineSort] = useState<-1 | 0 | 1>(0);
+  const [status, setStatus] = useState<Switch>(searchParams.get('isDone') ? 0 : 1);
+  const [createdDateSort, setCreatedDateSort] = useState<Switch>(0);
+  const [deadlineSort, setDeadlineSort] = useState<Switch>(0);
 
   const createFormRef = useRef<HTMLFormElement>(null);
   const createBtnRef = useRef<HTMLDivElement>(null);
@@ -83,7 +87,9 @@ export default function Home() {
     setEditData((prev) => ({ ...prev, assignees }));
   };
 
-  const fetchData = useCallback((url:string) => {
+  const fetchData = useCallback((url:string = `/api${pathname}?${searchParams.toString()}`) => {
+    setLoading(true)
+    console.log('call axios ', url)
     axios.get(url)
       .then(({data}) => {
         console.log(data)
@@ -101,16 +107,24 @@ export default function Home() {
             completed: task.isDone
           }
         })
-        console.log(normalize_tasks)
+        console.log('update store with: ', normalize_tasks)
         dispatch(initTasks(normalize_tasks));
-        setTodo(normalize_tasks)
         setPagination(pagination)
+        setLoading(false)
       })
-  }, [])
+  }, [pathname, searchParams])
 
   useEffect(() => {
-    fetchData(`/api${pathname}?${searchParams.toString()}`)
+    console.log('url changed')
+    fetchData()
   }, [pathname, searchParams, fetchData])
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setSearchText(filterSearch)
+    }, 500)
+    return ()=>clearTimeout(delay)
+  }, [filterSearch])
 
   useEffect(() => {
     const handler: EventListener = (e: any) => {
@@ -139,9 +153,10 @@ export default function Home() {
     if (editMode) titleRef.current?.focus();
   }, [editMode]);
 
-  // useEffect(() => {
-  //   setTodo(tasks);
-  // }, [tasks]);
+  useEffect(() => {
+    console.log('tasks updated');
+    setTodo(tasks)
+  }, [tasks]);
 
   const createHandler = async () => {
     const createData = {
@@ -178,7 +193,8 @@ export default function Home() {
         return;
       }
       console.log(data.task);
-      dispatch(createTask({ id: data.task.id, ...createData }));
+      // dispatch(createTask({ id: data.task.id, ...createData }));
+      fetchData()
       notification.success({
         message: "Create task successfully",
         duration: 3,
@@ -203,7 +219,7 @@ export default function Home() {
   };
   useEffect(() => {
     const params = new URLSearchParams();
-    if(filterSearch?.trim()) params.set('q', filterSearch.trim())
+    if(searchText?.trim()) params.set('q', searchText.trim())
     if(status) params.set('isDone', status === 1 ? '1' : '0')
     if(createdDateSort) {
       params.set('sortBy', 'created_at')
@@ -213,9 +229,10 @@ export default function Home() {
       params.set('sortBy', 'due_at')
       params.set('sort', deadlineSort === 1 ? 'asc' : 'desc')
     }
-    if(limit) params.set('limit', limit.toString())
+    if(limit) params.set('limit', limit+'')
+    if(page) params.set('page', page+'')
     router.push(`${pathname}?${params.toString()}`)
-  }, [status, filterSearch, createdDateSort, deadlineSort, limit, pathname, router]);
+  }, [status, searchText, createdDateSort, deadlineSort, limit, page, pathname, router]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -238,12 +255,15 @@ export default function Home() {
         return <FontAwesomeIcon icon={faSort} />;
     }
   };
-  const getStatus = (key: Status) => {
+  const getStatus = (key: Switch) => {
     return statusList.find((item) => item.value === key);
   };
 
   return (
     <main className="flex flex-col px-24 pt-10">
+      {loading && <div className="w-full h-full bg-white/40 flex justify-center items-center absolute top-0 left-0 z-[500]">
+        <FontAwesomeIcon icon={faSpinner} className="animate-spin spinner" />
+      </div>}
       <div className="flex gap-4 mb-5">
         <div className="flex flex-col group/status min-w-[120px] cursor-pointer relative bg-inherit">
           <div className="absolute w-full bg-white">
@@ -383,7 +403,7 @@ export default function Home() {
           + New task
         </div>
       )}
-      {pagination && <Pagination pagination={pagination} />}
+      {pagination && <Pagination pagination={pagination} updatePage={(number:number) => setPage(number)} />}
     </main>
   );
 }
