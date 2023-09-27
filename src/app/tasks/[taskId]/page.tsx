@@ -49,7 +49,7 @@ export default function Task() {
             <div>Done: {task.completed ? 'Yes' : 'Not yet'}</div>
           </div>:
             <div className="min-w-[50%] min-h-[50%] py-10 px-20 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] bg-white">Task not found 
-            <Link href={'/tasks'}>Back to homepage</Link></div>
+            &nbsp;<Link href={'/tasks'} className="text-blue-600 hover:underline">Back to homepage</Link></div>
           }
         </Loading>
       </div>
