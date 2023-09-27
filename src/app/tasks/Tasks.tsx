@@ -16,12 +16,12 @@ import {
   faSort,
   faSortDown,
   faSortUp,
-  faSpinner,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { notification } from "antd";
 import Pagination from "@/components/Pagination";
+import Loading from "@/components/Loading";
 
 interface EditData {
   title: string;
@@ -50,7 +50,7 @@ const statusList: { value: Switch; label: string }[] = [
     label: "Complete",
   },
 ];
-const limitList: number[] = [12, 20, 50]
+const limitList: number[] = [2, 5, 12, 20, 50]
 
 export default function Home() {
   const router = useRouter();
@@ -73,7 +73,7 @@ export default function Home() {
   const [showLimit, setShowLimit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [status, setStatus] = useState<Switch>(searchParams.get('isDone') ? 0 : 1);
+  const [status, setStatus] = useState<Switch>(searchParams.get('isDone') ? (searchParams.get('isDone') === '1' ? 1 : -1) : 0);
   const [createdDateSort, setCreatedDateSort] = useState<Switch>(0);
   const [deadlineSort, setDeadlineSort] = useState<Switch>(0);
 
@@ -220,7 +220,7 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams();
     if(searchText?.trim()) params.set('q', searchText.trim())
-    if(status) params.set('isDone', status === 1 ? '1' : '0')
+    if(status !== 0) params.set('isDone', status === 1 ? '1' : '0')
     if(createdDateSort) {
       params.set('sortBy', 'created_at')
       params.set('sort', createdDateSort === 1 ? 'asc' : 'desc')
@@ -231,6 +231,8 @@ export default function Home() {
     }
     if(limit) params.set('limit', limit+'')
     if(page) params.set('page', page+'')
+    console.log(params.toString());
+    
     router.push(`${pathname}?${params.toString()}`)
   }, [status, searchText, createdDateSort, deadlineSort, limit, page, pathname, router]);
 
@@ -261,149 +263,148 @@ export default function Home() {
 
   return (
     <main className="flex flex-col px-24 pt-10">
-      {loading && <div className="w-full h-full bg-white/40 flex justify-center items-center absolute top-0 left-0 z-[500]">
-        <FontAwesomeIcon icon={faSpinner} className="animate-spin spinner" />
-      </div>}
-      <div className="flex gap-4 mb-5">
-        <div className="flex flex-col group/status min-w-[120px] cursor-pointer relative bg-inherit">
-          <div className="absolute w-full bg-white">
-            <div className="capitalize shadow-md px-4 py-[6px]">
-              Status: {getStatus(status)?.label}
-            </div>
-            <div className="shadow-md">
-            {statusList.map((item) => (
-              <div
-                key={item.value}
-                className="hidden group-hover/status:block hover:bg-gray-600 hover:text-white  px-2"
-                onClick={() => setStatus(item.value)}
-              >
-                {item.label}
+      <Loading loading={loading}>
+        <div className="flex gap-4 mb-5">
+          <div className="flex flex-col group/status min-w-[120px] cursor-pointer relative bg-inherit">
+            <div className="absolute w-full bg-white">
+              <div className="capitalize shadow-md px-4 py-[6px]">
+                Status: {getStatus(status)?.label}
               </div>
-            ))}
+              <div className="shadow-md">
+              {statusList.map((item) => (
+                <div
+                  key={item.value}
+                  className="hidden group-hover/status:block hover:bg-gray-600 hover:text-white  px-2"
+                  onClick={() => setStatus(item.value)}
+                >
+                  {item.label}
+                </div>
+              ))}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="relative max-w-xs">
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-            className="absolute w-4 h-4 left-2 top-[50%] translate-y-[-50%] cursor-pointer"
-            onClick={() => searchRef.current?.focus()}
-          />
-          <input
-            type="text"
-            ref={searchRef}
-            className={
-              filterSearch.trim()
-              ? "w-[80%] pl-8 bg-transparent border-2 border-black outline-none transition-all"
-              : "w-0 pl-8 bg-transparent border-2 border-transparent focus:w-[80%] focus:border-black outline-none transition-all"
-            }
-            onChange={filterTask}
-            value={filterSearch}
-          />
-        </div>
-        <div className="flex-1"></div>
-        <div className="relative">
-          <label htmlFor="checkbox" className="bg-white shadow-md px-4 py-2">
-            Tasks/page: {limit}
-          </label>
-          <input type="checkbox" hidden id="checkbox" onChange={e => setShowLimit(e.target.checked)} />
-          {showLimit && <div className="flex flex-col absolute top-[100%] right-0 bg-white shadow-md min-w-[40px]">
-            {limitList.map(limit => (
-              <div 
-                key={limit} 
-                onClick={()=>{
-                  setLimit(limit); 
-                  setShowLimit(false)}
-                } 
-                className="cursor-pointer hover:bg-gray-200 text-right px-3"
-              >
-                {limit}
-              </div>))
-            }
-          </div>}
-        </div>
-      </div>
-      <div className="flex border-b-2">
-        <div className="w-10"></div>
-        <div className="flex-[4] flex items-center">
-          <span>Title</span>
-        </div>
-        <div className="flex-[2]">Assignees</div>
-        <div
-          className="flex-[2] cursor-pointer"
-          onClick={() => {
-            changeSort(setCreatedDateSort);
-            setDeadlineSort(0);
-          }}
-        >
-          Created At {sortIcon(createdDateSort)}
-        </div>
-        <div
-          className="flex-[2] cursor-pointer"
-          onClick={() => {
-            changeSort(setDeadlineSort);
-            setCreatedDateSort(0);
-          }}
-        >
-          Due At {sortIcon(deadlineSort)}
-        </div>
-        <div className="flex-[2]">Created by</div>
-      </div>
-      <div className="flex flex-col gap-2 mt-2">
-        {todo && todo.length > 0 ? (
-          todo.map((task) => <TaskItem key={task.id} task={task} />)
-        ) : (
-          <span className="text-xl mt-4">There are no todo. Create new</span>
-        )}
-      </div>
-      {editMode ? (
-        <form
-          className="flex flex-row gap-4 items-center mt-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            createHandler();
-          }}
-          ref={createFormRef}
-        >
-          <input
-            type="text"
-            className="flex-1 border-b-2 outline-none"
-            ref={titleRef}
-            onChange={editTitle}
-          />
-          <UserSelector changeHandler={getAssignees} />
-          <input
-            className="basis-[224px]"
-            type="date"
-            id="deadline"
-            name="deadline"
-            onChange={editDeadline}
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-cyan-900 p-2 basis-18 text-white max-h-12"
-          >
-            Save
-          </button>
-          <div
-            className="rounded-lg bg-red-600 p-2 basis-10 text-white text-center cursor-pointer"
-            onClick={() => setEditMode(false)}
-          >
-            <FontAwesomeIcon icon={faTimes} />
+          <div className="relative max-w-xs">
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              className="absolute w-4 h-4 left-2 top-[50%] translate-y-[-50%] cursor-pointer"
+              onClick={() => searchRef.current?.focus()}
+            />
+            <input
+              type="text"
+              ref={searchRef}
+              className={
+                filterSearch.trim()
+                ? "w-[80%] pl-8 bg-transparent border-2 border-black outline-none transition-all"
+                : "w-0 pl-8 bg-transparent border-2 border-transparent focus:w-[80%] focus:border-black outline-none transition-all"
+              }
+              onChange={filterTask}
+              value={filterSearch}
+            />
           </div>
-        </form>
-      ) : (
-        <div
-          className="mt-3 cursor-pointer text-black/800 hover:bg-green-500 hover:text-white self-start p-4 rounded-lg"
-          onClick={() => {
-            setEditMode(true);
-          }}
-          ref={createBtnRef}
-        >
-          + New task
+          <div className="flex-1"></div>
+          <div className="relative">
+            <label htmlFor="checkbox" className="bg-white shadow-md px-4 py-2">
+              Tasks/page: {limit}
+            </label>
+            <input type="checkbox" hidden id="checkbox" onChange={e => setShowLimit(e.target.checked)} />
+            {showLimit && <div className="flex flex-col absolute top-[100%] right-0 bg-white shadow-md min-w-[40px]">
+              {limitList.map(limit => (
+                <div
+                  key={limit}
+                  onClick={()=>{
+                    setLimit(limit);
+                    setShowLimit(false)}
+                  }
+                  className="cursor-pointer hover:bg-gray-200 text-right px-3"
+                >
+                  {limit}
+                </div>))
+              }
+            </div>}
+          </div>
         </div>
-      )}
-      {pagination && <Pagination pagination={pagination} updatePage={(number:number) => setPage(number)} />}
+        <div className="flex border-b-2">
+          <div className="w-10"></div>
+          <div className="flex-[4] flex items-center">
+            <span>Title</span>
+          </div>
+          <div className="flex-[2]">Assignees</div>
+          <div
+            className="flex-[2] cursor-pointer"
+            onClick={() => {
+              changeSort(setCreatedDateSort);
+              setDeadlineSort(0);
+            }}
+          >
+            Created At {sortIcon(createdDateSort)}
+          </div>
+          <div
+            className="flex-[2] cursor-pointer"
+            onClick={() => {
+              changeSort(setDeadlineSort);
+              setCreatedDateSort(0);
+            }}
+          >
+            Due At {sortIcon(deadlineSort)}
+          </div>
+          <div className="flex-[2]">Created by</div>
+        </div>
+        <div className="flex flex-col gap-2 mt-2">
+          {todo && todo.length > 0 ? (
+            todo.map((task) => <TaskItem key={task.id} task={task} />)
+          ) : (
+            <span className="text-xl mt-4">There are no todo. Create new</span>
+          )}
+        </div>
+        {editMode ? (
+          <form
+            className="flex flex-row gap-4 items-center mt-5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              createHandler();
+            }}
+            ref={createFormRef}
+          >
+            <input
+              type="text"
+              className="flex-1 border-b-2 outline-none"
+              ref={titleRef}
+              onChange={editTitle}
+            />
+            <UserSelector changeHandler={getAssignees} />
+            <input
+              className="basis-[224px]"
+              type="date"
+              id="deadline"
+              name="deadline"
+              onChange={editDeadline}
+            />
+            <button
+              type="submit"
+              className="rounded-lg bg-cyan-900 p-2 basis-18 text-white max-h-12"
+            >
+              Save
+            </button>
+            <div
+              className="rounded-lg bg-red-600 p-2 basis-10 text-white text-center cursor-pointer"
+              onClick={() => setEditMode(false)}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </div>
+          </form>
+        ) : (
+          <div
+            className="mt-3 cursor-pointer text-black/800 hover:bg-green-500 hover:text-white self-start p-4 rounded-lg"
+            onClick={() => {
+              setEditMode(true);
+            }}
+            ref={createBtnRef}
+          >
+            + New task
+          </div>
+        )}
+        {pagination && <Pagination pagination={pagination} updatePage={(number:number) => setPage(number)} />}
+      </Loading>
     </main>
   );
 }
