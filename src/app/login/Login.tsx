@@ -3,18 +3,15 @@
 import Link from "next/link";
 import { FormEvent, useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store";
+import { useDispatch } from "react-redux";
 import { saveInfo } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import { notification } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
-export default function Page() {
-  const auth = useSelector((state: RootState) => state.auth);
+export default function Page({cookie}: {cookie:string}) {
   const router = useRouter();
-
   // if (auth.accessToken) router.push("/tasks");
 
   const [username, setUsername] = useState<string>("");
@@ -22,6 +19,14 @@ export default function Page() {
   const [showPw, setShowPw] = useState<boolean>(false);
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if(cookie) router.push("/tasks")
+    else {
+      localStorage.removeItem('auth')
+      dispatch(saveInfo({}))
+    }
+  }, [cookie, router, dispatch])
 
   const login = async (e: FormEvent<Element>) => {
     e.preventDefault();
