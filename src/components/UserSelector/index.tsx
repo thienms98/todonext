@@ -12,6 +12,7 @@ import {
   faBars,
 } from "@fortawesome/free-solid-svg-icons";
 import { RootState } from "@/store";
+import Tooltip from "../Tooltip";
 
 const UserSelector = ({
   selection,
@@ -82,19 +83,20 @@ const UserSelector = ({
         {selected.length > 0 ? (
           <>
             {selected.map((user) => (
-              <div
-                key={Math.random()}
-                className="w-6 h-6 rounded-full overflow-hidden"
-              >
-                <Image
-                  width={24}
-                  height={24}
-                  src={user.image || "https://picsum.photos/200"}
-                  alt={user.username || ""}
-                  title={user.username}
-                  className="h-full object-cover"
-                />
-              </div>
+              <Tooltip title={user.username} key={user.id}>
+                <div
+                  className="w-6 h-6 rounded-full overflow-hidden"
+                >
+                  <Image
+                    width={24}
+                    height={24}
+                    src={user.image || "https://picsum.photos/200"}
+                    alt={user.username || ""}
+                    title={user.username}
+                    className="h-full object-cover"
+                  />
+                </div>
+              </Tooltip>
             ))}
             <div className="w-6 h-6 rounded-full overflow-hidden border-2 flex items-center justify-center">
               <FontAwesomeIcon icon={faBars} />

@@ -30,6 +30,7 @@ import type { Task, User } from "@/utils/types";
 import UserSelector from "../UserSelector";
 import { notification } from "antd";
 import { RootState } from "@/store";
+import Tooltip from "../Tooltip";
 
 function Task({ task }: { task: Task }) {
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -235,19 +236,20 @@ function Task({ task }: { task: Task }) {
         <FontAwesomeIcon icon={faCalendar} className="hidden group-hover/container:block" onClick={()=>dateRef.current?.showPicker()}/>
       </div>
       <div className="flex-[2]">
-        <div
-          className="w-6 h-6 rounded-full overflow-hidden cursor-pointer"
-          key={Math.random()}
-          title={task.creator.username}
-        >
-          <Image
-            height={24}
-            width={24}
-            src={task.creator.image || "https://picsum.photos/200"}
-            alt={task.creator.username || ""}
-            className="h-full object-cover"
-          />
-        </div>
+        <Tooltip title={task.creator.username}>
+          <div
+            className="w-6 h-6 rounded-full overflow-hidden cursor-pointer"
+            key={Math.random()}
+          >
+            <Image
+              height={24}
+              width={24}
+              src={task.creator.image || "https://picsum.photos/200"}
+              alt={task.creator.username || ""}
+              className="h-full object-cover"
+            />
+          </div>
+        </Tooltip>
       </div>
     </div>
   );
