@@ -50,7 +50,7 @@ const statusList: { value: Switch; label: string }[] = [
     label: "Complete",
   },
 ];
-const limitList: number[] = [2, 5, 12, 20, 50]
+const limitList: number[] = [8, 12, 16, 20]
 
 export default function Home() {
   const router = useRouter();
@@ -68,7 +68,7 @@ export default function Home() {
   const [searchText, setSearchText] = useState<string>("");
   const [pagination, setPagination] = useState<PaginationInfo>()
   const [page, setPage] = useState<number>(1)
-  const [limit, setLimit] = useState<number>(pagination?.pageSize || 12)
+  const [limit, setLimit] = useState<number>((pagination?.pageSize || 12) - 0)
   const [showLimit, setShowLimit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -81,6 +81,8 @@ export default function Home() {
   const titleRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const limitRef = useRef<HTMLButtonElement>(null)
+  console.log(limit);
+  
 
   const getAssignees: Function = (assignees: User[]) => {
     setEditData((prev) => ({ ...prev, assignees }));
@@ -152,7 +154,7 @@ export default function Home() {
     setTodo(tasks)
   }, [tasks]);
 
-  const createHandler = async () => {
+  const createHandler = async ():Promise<void> => {
     const createData = {
       ...editData,
       creator: {
@@ -200,14 +202,14 @@ export default function Home() {
     setEditData(defaultData);
   };
 
-  const editTitle = (e: any) => setNewTitle(e.target.value);
-  const editDeadline = (e: any) => {
+  const editTitle = (e: any):void => setNewTitle(e.target.value);
+  const editDeadline = (e: any):void => {
     const newEditData = { ...editData };
     newEditData.deadline = e.target.valueAsDate || new Date();
     setEditData(newEditData);
   };
 
-  const filterTask = (e: any) => {
+  const filterTask = (e: any):void => {
     setFilterSearch(e.target.value);
   };
   useEffect(() => {
@@ -257,8 +259,8 @@ export default function Home() {
     <main className="flex flex-col px-24 pt-10">
       <Loading loading={loading}>
         <div className="flex gap-4 mb-5">
-          <div className="flex flex-col group/status min-w-[250px] cursor-pointer relative bg-inherit">
-            <div className="absolute w-full bg-white">
+          <div className="flex flex-col group/status min-w-[180px] cursor-pointer relative bg-inherit">
+            <div className="absolute w-full bg-white text-xs">
               <div className="capitalize shadow-md px-4 py-[6px]">
                 Status: {getStatus(status)?.label}
               </div>
@@ -295,7 +297,7 @@ export default function Home() {
           </div>
           <div className="flex-1"></div>
           <div className="relative">
-            <label htmlFor="checkbox" className="bg-white shadow-md px-4 py-2">
+            <label htmlFor="checkbox" className="bg-white shadow-md px-4 py-2 text-xs">
               Tasks/page: {limit}
             </label>
             <input type="checkbox" hidden id="checkbox" onChange={e => setShowLimit(e.target.checked)} />
@@ -395,7 +397,7 @@ export default function Home() {
             + New task
           </div>
         )}
-        {pagination && <Pagination pagination={pagination} updatePage={(number:number) => setPage(number)} />}
+        {pagination && pagination.pageSize < pagination.totalCount && <Pagination pagination={pagination} updatePage={(number:number) => setPage(number)} />}
       </Loading>
     </main>
   );
