@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, memo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -35,8 +36,10 @@ function Task({ task }: { task: Task }) {
   const [title, setTitle] = useState<string>(task.title);
   const titleRef = useRef<HTMLInputElement | null>(null);
   const dateRef = useRef<HTMLInputElement | null>(null);
-  const dispatch = useDispatch();
   const { accessToken } = useSelector((state: RootState) => state.auth);
+  const { lastActions: {payload: lastPayload} } = useSelector((state: RootState) => state.tasks);
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   useEffect(() => {
     if (editMode && titleRef.current) titleRef.current.focus();
@@ -59,9 +62,12 @@ function Task({ task }: { task: Task }) {
     )) as { data: { success: boolean; message: string } };
     const { success, message } = data;
 
-    if (success) notification.success({ message });
-    else notification.error({ message });
     dispatch(changeState({ id: task.id }));
+    if (success) notification.success({ message });
+    else {
+      notification.error({ message })
+      dispatch(changeState({ id: task.id }));
+    };
   };
 
   const updateTitle = async () => {
@@ -74,12 +80,13 @@ function Task({ task }: { task: Task }) {
         'Content-Type': 'application/json'
       ,} }
     );
+    dispatch(changeTitle({ id: task.id, title }));
     if (!data.success) {
       notification.error({ message: "Update failed" });
+      dispatch(changeTitle({ id: task.id, title: lastPayload.title }));
       return;
     }
     notification.success({ message: "Update successfully" });
-    dispatch(changeTitle({ id: task.id, title }));
   };
 
   const updateDeadline = async (e: any) => {
@@ -91,12 +98,13 @@ function Task({ task }: { task: Task }) {
         { headers: { Authorization: `Bearer ${accessToken}`, 
         'Content-Type': 'application/json', } }
       );
+      dispatch(changeDeadline({ id: task.id, deadline }));
       if (!data.success) {
         notification.error({ message: "Update failed" });
+        dispatch(changeDeadline({ id: task.id, deadline: lastPayload.deadline }));
         return;
       }
       notification.success({ message: "Update successfully" });
-      dispatch(changeDeadline({ id: task.id, deadline }));
     }
   };
 
@@ -121,7 +129,7 @@ function Task({ task }: { task: Task }) {
       return;
     }
     notification.success({ message: "Update successfully" });
-    dispatch(changeAssignees({ id: task.id, assignees }));
+    dispatch(changeAssignees({ id: task.id, assignees: lastPayload.assignees }));
   };
 
   const deleteTask = async () => {
@@ -138,6 +146,7 @@ function Task({ task }: { task: Task }) {
     }
     notification.success({ message: "Delele task successfully" });
     dispatch(removeTask({ id: task.id }));
+    router.refresh()
   };
 
   return (

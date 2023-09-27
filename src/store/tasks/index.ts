@@ -1,19 +1,31 @@
 import {createSlice} from '@reduxjs/toolkit';
-import type {PayloadAction} from '@reduxjs/toolkit'
+import type {PayloadAction, SliceCaseReducers} from '@reduxjs/toolkit'
 import { Task, User } from '@/utils/types';
 
 const placeholderImg: string =
     'https://www.dovercourt.org/wp-content/uploads/2019/11/610-6104451_image-placeholder-png-user-profile-placeholder-image-png-286x300.jpg';
 
 
-const initialState: Task[] = [];
+const initialState: {
+  tasks: Task[],
+  lastActions: {
+    action: string,
+    payload: any
+  },
+} = {
+  tasks: [],
+  lastActions: {
+    action: '',
+    payload: {}
+  }
+}
 
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
   reducers: {
     initTasks(state, action: PayloadAction<Task[]>){
-      return action.payload
+      state.tasks = action.payload
     },
     createTask(state, action:PayloadAction<{id: number, title:string, deadline: Date, creator:User, assignees: User[]}>) {
       const data = {
@@ -21,32 +33,68 @@ const tasksSlice = createSlice({
         completed: false,
         ...action.payload
       };
-      state.push({...data})
+      state.tasks.push({...data})
+      state.lastActions = {
+        action: 'createTask',
+        payload: data
+      }
     },
     removeTask(state, action:PayloadAction<{id: number}>){
-      const idx = state.findIndex(task => task.id === action.payload.id);
-      if(idx !== -1) state.splice(idx, 1);
+      const idx = state.tasks.findIndex(task => task.id === action.payload.id);
+      if(idx !== -1){ 
+        state.lastActions = {
+          action: 'removeTask',
+          payload: state.tasks[idx]
+        }
+        state.tasks.splice(idx, 1);
+      }
     },
     changeState(state, action: PayloadAction<{id: number}>){
-      const idx = state.findIndex(item => item.id === action.payload.id);
+      const idx = state.tasks.findIndex(item => item.id === action.payload.id);
       if(idx === -1) return
-      state[idx].completed = !state[idx].completed;
+      state.tasks[idx].completed = !state.tasks[idx].completed;
+      state.lastActions = {
+        action: 'changeState',
+        payload: state.tasks[idx]
+      }
+      state.tasks.splice(idx, 1);
     },
     changeTitle(state, action: PayloadAction<{id: number, title:string}>){
-      const idx = state.findIndex(item => item.id === action.payload.id);
+      const idx = state.tasks.findIndex(item => item.id === action.payload.id);
       if(idx === -1) return
-      state[idx].title = action.payload.title
+      state.tasks[idx].title = action.payload.title
+      state.lastActions = {
+          action: 'changeTitle',
+          payload: state.tasks[idx]
+        }
+        state.tasks.splice(idx, 1);
     },
     changeAssignees(state, action: PayloadAction<{id: number, assignees: User[]}>){
-      const idx = state.findIndex(item => item.id === action.payload.id);
+      const idx = state.tasks.findIndex(item => item.id === action.payload.id);
       if(idx === -1) return
-      state[idx].assignees = action.payload.assignees
+      state.tasks[idx].assignees = action.payload.assignees
+      state.lastActions = {
+          action: 'changeAssignees',
+          payload: state.tasks[idx]
+        }
+        state.tasks.splice(idx, 1);
     },
     changeDeadline(state, action: PayloadAction<{id: number, deadline: Date}>){
-      const idx = state.findIndex(item => item.id === action.payload.id);
+      const idx = state.tasks.findIndex(item => item.id === action.payload.id);
       if(idx === -1) return
-      state[idx].deadline = action.payload.deadline
-    }
+      state.tasks[idx].deadline = action.payload.deadline
+      state.lastActions = {
+          action: 'changeDeadline',
+          payload: state.tasks[idx]
+        }
+        state.tasks.splice(idx, 1);
+    },
+    // revertAction(state){
+    //   const {action, payload} = state.lastActions
+    //   if(action === 'createTask') tasksSlice.caseReducers.removeTask(state, {payload: {id:payload.id}, type: 'tasks/removeTask'})
+    //   if(action === 'removeTask') tasksSlice.caseReducers.removeTask(state, {payload, type: 'tasks/createTask'})
+    //   // else tasksSlice.caseReducers[action](state, {payload, type: 'tasks/createTask'})
+    // }
   }
 })
 

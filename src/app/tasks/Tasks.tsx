@@ -56,7 +56,7 @@ export default function Home() {
   const router = useRouter();
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const tasks = useSelector((state: RootState) => state.tasks);
+  const {tasks} = useSelector((state: RootState) => state.tasks);
   const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   console.log('render tasks')
