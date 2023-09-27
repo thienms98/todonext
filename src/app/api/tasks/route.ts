@@ -49,8 +49,7 @@ export async function GET(req: NextRequest) {
       }
     ]
   }
-  if(isDone !== '0') where.isDone = {equals: isDone === '1' ? true : false}
-  console.log(where)
+  if(isDone) where.isDone = {equals: isDone === '1' ? true : false}
 
   const [total, tasks] = await prisma.$transaction([
     prisma.tasks.count({ 

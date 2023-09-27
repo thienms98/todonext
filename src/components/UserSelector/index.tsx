@@ -30,6 +30,10 @@ const UserSelector = ({
   const toggleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setSelected(selection || [])
+  }, [selection])
+
+  useEffect(() => {
     const handler: any = (e: React.MouseEvent) => {
       if (toggleRef.current && toggleRef.current.contains(e.target as any)) {
         return;

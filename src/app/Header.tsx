@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import {memo} from 'react'
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { saveInfo } from "@/store/auth";
@@ -71,4 +72,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default memo(Header);

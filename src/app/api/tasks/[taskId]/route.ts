@@ -1,14 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from '@/lib/prisma'
 import { verifyToken } from "@/utils/verifyToken";
-import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest, {params}: {params: {taskId: string}}){
   const {taskId} = params
+  const token = request.headers.get('cookie')?.slice(6);
+  if(!token) return NextResponse.json({success: false})
+  const data:any = verifyToken(token)
+  if(!data) return NextResponse.json({success: false})
 
   if(taskId?.trim() && +taskId){
     let task = await prisma.tasks.findUnique({
-      where: {id: +taskId},
+      where: {
+        id: +taskId,
+        OR: [
+          {
+            creatorid: data.id
+          },
+          {
+            assignees: {
+              some: {
+                userId: data.id
+              }
+            }
+          } 
+        ]
+      },
       include: {
         creator: {
           select: {
@@ -66,7 +83,7 @@ export async function PUT(request: NextRequest) {
     success: false,
     message: 'taskId must be a number'
   })
-  if(data.title && !data.title.trim()) return NextResponse.json({
+  if(!data.title && !data.title.trim()) return NextResponse.json({
     success: false,
     message: `task title can not be empty`
   })

@@ -11,6 +11,7 @@ import {
   changeTitle,
   changeAssignees,
   changeDeadline,
+  createTask,
 } from "@/store/tasks";
 import axios from "axios";
 
@@ -33,16 +34,14 @@ import { RootState } from "@/store";
 import Tooltip from "../Tooltip";
 
 function Task({ task }: { task: Task }) {
+  const router = useRouter();
+  const dispatch = useDispatch();
+
   const [editMode, setEditMode] = useState<boolean>(false);
   const [delMode, setDelMode] = useState<boolean>(false);
   const [title, setTitle] = useState<string>(task.title);
   const titleRef = useRef<HTMLInputElement | null>(null);
   const dateRef = useRef<HTMLInputElement | null>(null);
-  const { accessToken } = useSelector((state: RootState) => state.auth);
-  const { lastActions: {payload: lastPayload} } = useSelector((state: RootState) => state.tasks);
-  const dispatch = useDispatch();
-  const router = useRouter();
-
   useEffect(() => {
     if (editMode && titleRef.current) titleRef.current.focus();
   }, [editMode]);
@@ -57,11 +56,7 @@ function Task({ task }: { task: Task }) {
     dispatch(changeState({ id: task.id }));
     const { data } = (await axios.put(
       `/api/tasks/${task.id}`,
-      { isDone: !task.completed },
-      { headers: { 
-        Authorization: `Bearer ${accessToken}` ,
-        'Content-Type': 'application/json',
-      } }
+      { isDone: !task.completed }
     )) as { data: { success: boolean; message: string } };
     const { success, message } = data;
 
@@ -75,38 +70,32 @@ function Task({ task }: { task: Task }) {
   const updateTitle = async () => {
     setEditMode(false);
     dispatch(changeTitle({ id: task.id, title }));
+    if(title === task.title) return
     const { data } = await axios.put(
       `/api/tasks/${task.id}`,
-      { title },
-      { headers: { 
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      ,} }
+      { title }
     );
     if (!data.success) {
       notification.error({ message: "Update failed" });
-      dispatch(changeTitle({ id: task.id, title: lastPayload.title }));
-      return;
+      dispatch(changeTitle({id: task.id, title: task.title}));
+      setTitle(task.title)
     }
-    notification.success({ message: "Update successfully" });
+    else notification.success({ message: "Update successfully" });
   };
 
   const updateDeadline = async (e: any) => {
     const deadline = new Date(e.target.value);
     dispatch(changeDeadline({ id: task.id, deadline }));
-    if (deadline.getTime() - task.createdDate.getTime() >= 0) {
+    if (deadline.getTime() - task.createdDate.getTime() > 0) {
       const { data } = await axios.put(
         `/api/tasks/${task.id}`,
-        { due_at: deadline },
-        { headers: { Authorization: `Bearer ${accessToken}`, 
-        'Content-Type': 'application/json', } }
+        { due_at: deadline }
       );
       if (!data.success) {
         notification.error({ message: "Update failed" });
-        dispatch(changeDeadline({ id: task.id, deadline: lastPayload.deadline }));
-        return;
+        dispatch(changeDeadline({ id: task.id, deadline: task.deadline }));
       }
-      notification.success({ message: "Update successfully" });
+      else notification.success({ message: "Update successfully" });
     }
   };
 
@@ -124,12 +113,10 @@ function Task({ task }: { task: Task }) {
         taskId: task.id,
         userId: user.id,
       },
-      headers: { Authorization: `Bearer ${accessToken}`, 
-      'Content-Type': 'application/json', },
     });
     if (!data.success) {
       notification.error({ message: "Update failed" });
-      dispatch(changeAssignees({ id: task.id, assignees: lastPayload.assignees }));
+      dispatch(changeAssignees({ id: task.id, assignees: [...task.assignees] }));
       return;
     }
     notification.success({ message: "Update successfully" });
@@ -138,14 +125,11 @@ function Task({ task }: { task: Task }) {
   const deleteTask = async () => {
     dispatch(removeTask({ id: task.id }));
     const res = await axios.delete(
-      `/api/tasks/${task.id}`,
-      {
-        headers: { Authorization: `Bearer ${accessToken}`, 
-        'Content-Type': 'application/json', },
-      }
+      `/api/tasks/${task.id}`
     );
-    if (res.data.status === "failure") {
+    if (!res.data.success) {
       notification.error({ message: "Delele task failed" });
+      dispatch(createTask({...task}))
       return;
     }
     notification.success({ message: "Delele task successfully" });
@@ -187,7 +171,6 @@ function Task({ task }: { task: Task }) {
             </div>
             <div
               className="invisible cursor-pointer group-hover/interact:visible"
-              // onClick={() => dispatch(removeTask({ id: task.id }))}
               onMouseLeave={() => setDelMode(false)}
             >
               {delMode ? (
