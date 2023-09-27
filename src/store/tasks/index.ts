@@ -57,37 +57,33 @@ const tasksSlice = createSlice({
         action: 'changeState',
         payload: state.tasks[idx]
       }
-      state.tasks.splice(idx, 1);
     },
     changeTitle(state, action: PayloadAction<{id: number, title:string}>){
       const idx = state.tasks.findIndex(item => item.id === action.payload.id);
       if(idx === -1) return
       state.tasks[idx].title = action.payload.title
       state.lastActions = {
-          action: 'changeTitle',
-          payload: state.tasks[idx]
-        }
-        state.tasks.splice(idx, 1);
+        action: 'changeTitle',
+        payload: state.tasks[idx]
+      }
     },
     changeAssignees(state, action: PayloadAction<{id: number, assignees: User[]}>){
       const idx = state.tasks.findIndex(item => item.id === action.payload.id);
       if(idx === -1) return
-      state.tasks[idx].assignees = action.payload.assignees
       state.lastActions = {
-          action: 'changeAssignees',
-          payload: state.tasks[idx]
-        }
-        state.tasks.splice(idx, 1);
+        action: 'changeAssignees',
+        payload: state.tasks[idx]
+      }
+      state.tasks[idx].assignees = action.payload.assignees
     },
     changeDeadline(state, action: PayloadAction<{id: number, deadline: Date}>){
       const idx = state.tasks.findIndex(item => item.id === action.payload.id);
       if(idx === -1) return
       state.tasks[idx].deadline = action.payload.deadline
       state.lastActions = {
-          action: 'changeDeadline',
-          payload: state.tasks[idx]
-        }
-        state.tasks.splice(idx, 1);
+        action: 'changeDeadline',
+        payload: state.tasks[idx]
+      }
     },
     // revertAction(state){
     //   const {action, payload} = state.lastActions

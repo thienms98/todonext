@@ -124,12 +124,13 @@ function Task({ task }: { task: Task }) {
       headers: { Authorization: `Bearer ${accessToken}`, 
       'Content-Type': 'application/json', },
     });
+    dispatch(changeAssignees({ id: task.id, assignees: assignees }));
     if (!data.success) {
       notification.error({ message: "Update failed" });
+      dispatch(changeAssignees({ id: task.id, assignees: lastPayload.assignees }));
       return;
     }
     notification.success({ message: "Update successfully" });
-    dispatch(changeAssignees({ id: task.id, assignees: lastPayload.assignees }));
   };
 
   const deleteTask = async () => {
