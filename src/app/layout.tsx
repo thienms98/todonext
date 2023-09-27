@@ -27,7 +27,15 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <title>Todo</title>
-        <link rel="icon" href="/to-do-list.png" />
+        <meta property="description" content="Todoapp with next" />
+        <meta property="og:image" content="/preview.png"></meta>
+        <meta property="og:title" content="Todo"></meta>
+        <meta property="og:description" content="Todoapp with next" />
+        <meta property="og:url" content="/preview.png"></meta>
+        <meta property="twitter:image" content="/preview.png"></meta>
+        <meta property="twitter:card" content="/preview.png"></meta>
+        <meta property="twitter:title" content="Todo"></meta>
+        <meta property="twitter:description" content="Todoapp with next"></meta>
       </head>
       <body className={inter.className}>
         <Provider store={store}>
