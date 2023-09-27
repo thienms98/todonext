@@ -33,7 +33,7 @@ const tasksSlice = createSlice({
         completed: false,
         ...action.payload
       };
-      state.tasks.push({...data})
+      state.tasks = [{...data}, ...state.tasks]
       state.lastActions = {
         action: 'createTask',
         payload: data

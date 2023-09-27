@@ -146,7 +146,6 @@ function Task({ task }: { task: Task }) {
     }
     notification.success({ message: "Delele task successfully" });
     dispatch(removeTask({ id: task.id }));
-    router.refresh()
   };
 
   return (

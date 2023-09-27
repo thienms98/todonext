@@ -38,7 +38,7 @@ const Header = () => {
       {user && Object.keys(user).length > 1 ? (
         <>
           <div>
-            <Link href="/tasks">Tasks</Link>
+            <Link href="/tasks" className="hover:underline">Tasks</Link>
           </div>
           <div className="flex">
             <div className="rounded-full w-6 h-6 overflow-hidden">

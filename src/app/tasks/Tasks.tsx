@@ -192,9 +192,8 @@ export default function Home() {
         notification.error({ message: "Create task failed", duration: 3 });
         return;
       }
-      console.log(data.task);
-      // dispatch(createTask({ id: data.task.id, ...createData }));
-      fetchData()
+      dispatch(createTask({ id: data.task.id, ...createData }));
+      // fetchData()
       notification.success({
         message: "Create task successfully",
         duration: 3,
@@ -265,7 +264,7 @@ export default function Home() {
     <main className="flex flex-col px-24 pt-10">
       <Loading loading={loading}>
         <div className="flex gap-4 mb-5">
-          <div className="flex flex-col group/status min-w-[120px] cursor-pointer relative bg-inherit">
+          <div className="flex flex-col group/status min-w-[250px] cursor-pointer relative bg-inherit">
             <div className="absolute w-full bg-white">
               <div className="capitalize shadow-md px-4 py-[6px]">
                 Status: {getStatus(status)?.label}
@@ -351,7 +350,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col gap-2 mt-2">
           {todo && todo.length > 0 ? (
-            todo.map((task) => <TaskItem key={task.id} task={task} />)
+            [...todo].splice(0, limit).map((task) => <TaskItem key={task.id} task={task} />)
           ) : (
             <span className="text-xl mt-4">There are no todo. Create new</span>
           )}
