@@ -24,6 +24,7 @@ import {
   faTimes,
   faCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 
 import type { Task, User } from "@/utils/types";
 import UserSelector from "../UserSelector";
@@ -52,6 +53,7 @@ function Task({ task }: { task: Task }) {
   }, []);
 
   const updateCompleted = async () => {
+    dispatch(changeState({ id: task.id }));
     const { data } = (await axios.put(
       `/api/tasks/${task.id}`,
       { isDone: !task.completed },
@@ -62,7 +64,6 @@ function Task({ task }: { task: Task }) {
     )) as { data: { success: boolean; message: string } };
     const { success, message } = data;
 
-    dispatch(changeState({ id: task.id }));
     if (success) notification.success({ message });
     else {
       notification.error({ message })
@@ -72,6 +73,7 @@ function Task({ task }: { task: Task }) {
 
   const updateTitle = async () => {
     setEditMode(false);
+    dispatch(changeTitle({ id: task.id, title }));
     const { data } = await axios.put(
       `/api/tasks/${task.id}`,
       { title },
@@ -80,7 +82,6 @@ function Task({ task }: { task: Task }) {
         'Content-Type': 'application/json'
       ,} }
     );
-    dispatch(changeTitle({ id: task.id, title }));
     if (!data.success) {
       notification.error({ message: "Update failed" });
       dispatch(changeTitle({ id: task.id, title: lastPayload.title }));
@@ -91,14 +92,14 @@ function Task({ task }: { task: Task }) {
 
   const updateDeadline = async (e: any) => {
     const deadline = new Date(e.target.value);
-    if (deadline.getTime() - new Date().getTime() >= 0) {
+    dispatch(changeDeadline({ id: task.id, deadline }));
+    if (deadline.getTime() - task.createdDate.getTime() >= 0) {
       const { data } = await axios.put(
         `/api/tasks/${task.id}`,
         { due_at: deadline },
         { headers: { Authorization: `Bearer ${accessToken}`, 
         'Content-Type': 'application/json', } }
       );
-      dispatch(changeDeadline({ id: task.id, deadline }));
       if (!data.success) {
         notification.error({ message: "Update failed" });
         dispatch(changeDeadline({ id: task.id, deadline: lastPayload.deadline }));
@@ -113,6 +114,7 @@ function Task({ task }: { task: Task }) {
     flag: number,
     user: User
   ) => {
+    dispatch(changeAssignees({ id: task.id, assignees: assignees }));
     const method = flag === -1 ? "delete" : "post";
     const { data } = await axios({
       url: `/api/assignees`,
@@ -124,7 +126,6 @@ function Task({ task }: { task: Task }) {
       headers: { Authorization: `Bearer ${accessToken}`, 
       'Content-Type': 'application/json', },
     });
-    dispatch(changeAssignees({ id: task.id, assignees: assignees }));
     if (!data.success) {
       notification.error({ message: "Update failed" });
       dispatch(changeAssignees({ id: task.id, assignees: lastPayload.assignees }));
@@ -134,6 +135,7 @@ function Task({ task }: { task: Task }) {
   };
 
   const deleteTask = async () => {
+    dispatch(removeTask({ id: task.id }));
     const res = await axios.delete(
       `/api/tasks/${task.id}`,
       {
@@ -146,11 +148,11 @@ function Task({ task }: { task: Task }) {
       return;
     }
     notification.success({ message: "Delele task successfully" });
-    dispatch(removeTask({ id: task.id }));
+    router.replace(window.location.href)
   };
 
   return (
-    <div className="flex flex-row items-center">
+    <div className="flex flex-row items-center border-b-2 min-h-[32px] group/container">
       <div className="w-10" onClick={updateCompleted}>
         <FontAwesomeIcon icon={task.completed ? faCircleCheck : faCircle} />
       </div>
@@ -221,14 +223,16 @@ function Task({ task }: { task: Task }) {
       <div className=" flex-[2]">
         {task.createdDate.toLocaleDateString("vi")}
       </div>
-      <div className=" flex-[2] group/date flex flex-nowrap items-center">
+      <div className=" flex-[2] flex flex-nowrap items-center gap-1">
         <span className="">{task.deadline.toLocaleDateString("vi")}</span>
         <input
           type="date"
-          className="hidden group-hover/date:block focus:block w-6"
+          className="w-0 outline-none"
           ref={dateRef}
           onChange={updateDeadline}
+          id="datepicker"
         />
+        <FontAwesomeIcon icon={faCalendar} className="hidden group-hover/container:block" onClick={()=>dateRef.current?.showPicker()}/>
       </div>
       <div className="flex-[2]">
         <div

@@ -13,6 +13,7 @@ import type { User, Task, Pagination as PaginationInfo } from "@/utils/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
+  faRotateRight,
   faSort,
   faSortDown,
   faSortUp,
@@ -71,6 +72,7 @@ export default function Home() {
   const [limit, setLimit] = useState<number>((pagination?.pageSize || 12) - 0)
   const [showLimit, setShowLimit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   const [status, setStatus] = useState<Switch>(searchParams.get('isDone') ? (searchParams.get('isDone') === '1' ? 1 : -1) : 0);
   const [createdDateSort, setCreatedDateSort] = useState<Switch>(0);
@@ -81,7 +83,6 @@ export default function Home() {
   const titleRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const limitRef = useRef<HTMLButtonElement>(null)
-  console.log(limit);
   
 
   const getAssignees: Function = (assignees: User[]) => {
@@ -123,7 +124,10 @@ export default function Home() {
     return ()=>clearTimeout(delay)
   }, [filterSearch])
 
+  // useEffect(() => {}, [])
+  
   useEffect(() => {
+    setRefresh(false)
     const handler: EventListener = (e: any) => {
       if (
         createFormRef.current &&
@@ -194,6 +198,7 @@ export default function Home() {
         message: "Create task successfully",
         duration: 3,
       });
+      fetchData()
     } catch (err) {
       notification.error({ message: "Create task failed", duration: 3 });
     }
@@ -318,7 +323,14 @@ export default function Home() {
           </div>
         </div>
         <div className="flex border-b-2">
-          <div className="w-10"></div>
+          <div className="w-10">
+            {/* <FontAwesomeIcon className={refresh ? 'animate-spin' : ''} 
+              icon={faRotateRight} 
+              onClick={() => {
+                // setRefresh(true)
+                // router.refresh(window.location.href)
+              }}/> */}
+          </div>
           <div className="flex-[4] flex items-center">
             <span>Title</span>
           </div>
