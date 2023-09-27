@@ -7,9 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default async function Task({ params }: { params: { taskId: string } }) {
   // const { data: task } = await getTask(params.taskId);
-  // console.log(task);
   const router = useRouter();
-  console.log(params);
 
   return (
     <div

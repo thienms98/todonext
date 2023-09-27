@@ -10,6 +10,5 @@
 //       Authorization: `Bearer ${accessToken}`
 //     }
 //   })}catch(err){
-//     console.log(err)
 //   }
 // }

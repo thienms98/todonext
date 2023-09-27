@@ -59,7 +59,6 @@ export default function Home() {
   const {tasks} = useSelector((state: RootState) => state.tasks);
   const auth = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-  console.log('render tasks')
 
   const [todo, setTodo] = useState<Task[]>(tasks)
   const [newTitle, setNewTitle] = useState<string>("");
@@ -89,10 +88,8 @@ export default function Home() {
 
   const fetchData = useCallback((url:string = `/api${pathname}?${searchParams.toString()}`) => {
     setLoading(true)
-    console.log('call axios ', url)
     axios.get(url)
       .then(({data}) => {
-        console.log(data)
         if(!data.success) return
         const {tasks, pagination} = data
         const normalize_tasks:Task[] = Object.keys(tasks).map(key => {
@@ -107,7 +104,6 @@ export default function Home() {
             completed: task.isDone
           }
         })
-        console.log('update store with: ', normalize_tasks)
         dispatch(initTasks(normalize_tasks));
         setPagination(pagination)
         setLoading(false)
@@ -115,7 +111,6 @@ export default function Home() {
   }, [pathname, searchParams])
 
   useEffect(() => {
-    console.log('url changed')
     fetchData()
   }, [pathname, searchParams, fetchData])
 
@@ -154,7 +149,6 @@ export default function Home() {
   }, [editMode]);
 
   useEffect(() => {
-    console.log('tasks updated');
     setTodo(tasks)
   }, [tasks]);
 
@@ -230,7 +224,6 @@ export default function Home() {
     }
     if(limit) params.set('limit', limit+'')
     if(page) params.set('page', page+'')
-    console.log(params.toString());
     
     router.push(`${pathname}?${params.toString()}`)
   }, [status, searchText, createdDateSort, deadlineSort, limit, page, pathname, router]);

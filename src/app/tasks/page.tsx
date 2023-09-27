@@ -39,7 +39,6 @@ import { Task, User, TaskResponse, Pagination } from "@/utils/types";
 // }
 
 const Page = async ({searchParams}: {searchParams: {limit: string, page: string}}) => {
-  // console.log("render tasks page");
 
   // const token = headers().get('cookie')?.slice(6)
   // if(!token) redirect('/login')

@@ -58,7 +58,6 @@ const UserSelector = ({
   }, [search]);
 
   const handleSelect: Function = (user: User) => {
-    console.log(user);
     const idx = selected.findIndex((item) => item.username === user.username);
     let newSelected = [...selected];
     let flag;

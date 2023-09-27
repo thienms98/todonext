@@ -6,12 +6,10 @@ const Pagination = ({pagination, updatePage}: {pagination: PaginationInfo, updat
   pageNumber -= 0
   pageSize -= 0
   // const searchParams = useSearchParams();
-  console.log({totalCount, pageSize, pageNumber});
 
   const pageCount = Math.ceil(totalCount / pageSize)
   if(pageNumber < 0 || pageNumber > pageCount) updatePage(0)
   const array = Array.apply(null, Array(pageCount)).map((item,index) => index+1)
-  console.log(array);
   
   const getButtons = () => {
     if(pageNumber <= 5){
