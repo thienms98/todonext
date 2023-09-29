@@ -65,7 +65,7 @@ export default function Home() {
   const [newTitle, setNewTitle] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editData, setEditData] = useState<EditData>(defaultData);
-  const [filterSearch, setFilterSearch] = useState<string>(searchParams.get('q'));
+  const [filterSearch, setFilterSearch] = useState<string>(searchParams?.get('q') || '');
   const [searchText, setSearchText] = useState<string>("");
   const [pagination, setPagination] = useState<PaginationInfo>()
   const [page, setPage] = useState<number>(1)
