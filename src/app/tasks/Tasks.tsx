@@ -65,14 +65,13 @@ export default function Home() {
   const [newTitle, setNewTitle] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editData, setEditData] = useState<EditData>(defaultData);
-  const [filterSearch, setFilterSearch] = useState<string>("");
+  const [filterSearch, setFilterSearch] = useState<string>(searchParams.get('q'));
   const [searchText, setSearchText] = useState<string>("");
   const [pagination, setPagination] = useState<PaginationInfo>()
   const [page, setPage] = useState<number>(1)
   const [limit, setLimit] = useState<number>((pagination?.pageSize || 12) - 0)
   const [showLimit, setShowLimit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [refresh, setRefresh] = useState<boolean>(false);
 
   const [status, setStatus] = useState<Switch>(searchParams.get('isDone') ? (searchParams.get('isDone') === '1' ? 1 : -1) : 0);
   const [createdDateSort, setCreatedDateSort] = useState<Switch>(0);
@@ -82,7 +81,6 @@ export default function Home() {
   const createBtnRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const limitRef = useRef<HTMLButtonElement>(null)
   
 
   const getAssignees: Function = (assignees: User[]) => {
@@ -120,14 +118,13 @@ export default function Home() {
   useEffect(() => {
     const delay = setTimeout(() => {
       setSearchText(filterSearch)
-    }, 500)
+    }, 300)
     return ()=>clearTimeout(delay)
   }, [filterSearch])
 
   // useEffect(() => {}, [])
   
   useEffect(() => {
-    setRefresh(false)
     const handler: EventListener = (e: any) => {
       if (
         createFormRef.current &&
@@ -219,7 +216,12 @@ export default function Home() {
   };
   useEffect(() => {
     const params = new URLSearchParams();
-    if(searchText?.trim()) params.set('q', searchText.trim())
+    if(searchText?.trim()) {
+      params.set('q', searchText.trim())
+      if(searchParams.get('q') !== searchText.trim()) params.set('page', '1')
+      else if(page) params.set('page', page+'')
+    }
+    else if(page) params.set('page', page+'')
     if(status !== 0) params.set('isDone', status === 1 ? '1' : '0')
     if(createdDateSort) {
       params.set('sortBy', 'created_at')
@@ -230,10 +232,9 @@ export default function Home() {
       params.set('sort', deadlineSort === 1 ? 'asc' : 'desc')
     }
     if(limit) params.set('limit', limit+'')
-    if(page) params.set('page', page+'')
     
     router.push(`${pathname}?${params.toString()}`)
-  }, [status, searchText, createdDateSort, deadlineSort, limit, page, pathname, router]);
+  }, [status, searchText, createdDateSort, deadlineSort, limit, page, pathname, router, searchParams]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
