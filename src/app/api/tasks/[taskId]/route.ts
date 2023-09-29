@@ -83,7 +83,7 @@ export async function PUT(request: NextRequest) {
     success: false,
     message: 'taskId must be a number'
   })
-  if(!data.title && !data.title.trim()) return NextResponse.json({
+  if(data.title != undefined && !data.title.trim()) return NextResponse.json({
     success: false,
     message: `task title can not be empty`
   })

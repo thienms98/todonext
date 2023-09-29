@@ -36,21 +36,37 @@ export async function DELETE(req: NextRequest) {
   })
   
   const {taskId, userId}: {taskId:number, userId:number} = await req.json();
+  const selfId:number = data.id;
 
   try{
-    const deleted = await prisma.assignees.delete({
-      where: {
-        userId_taskId: {
-          userId,
-          taskId
-        },
-        tasks: {
-          OR: [
-            {creatorid: data.id},
-          ]
+     // nguoi bi xoa chinh la minh => xoa
+    if(userId === selfId)
+      await prisma.assignees.delete(
+        {
+          where: {
+            userId_taskId: {
+              userId,
+              taskId
+            },
+          }
         }
-      }
-    })
+      )
+    // nguoi bi xoa khong phai la minh => | minh la nguoi tao => xoa
+    //                                    | khong phai nguoi tao => khong xoa
+    else
+      await prisma.assignees.delete(
+        {
+          where: {
+            userId_taskId: {
+              userId,
+              taskId
+            },
+            tasks: {
+              creatorid: selfId
+            }
+          }
+        }
+      )
     return NextResponse.json({
       success: true
     })
@@ -58,6 +74,7 @@ export async function DELETE(req: NextRequest) {
   catch(err){
     return NextResponse.json({
       success: false,
+      message: JSON.stringify(err)
     })
   }
 }
